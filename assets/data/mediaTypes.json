@@ -1,0 +1,11 @@
+[
+  { "label": "SPARQL Results JSON", "value": "application/sparql-results+json" },
+  { "label": "SPARQL Results XML", "value": "application/sparql-results+xml" },
+  { "label": "CSV", "value": "text/csv" },
+  { "label": "TSV", "value": "text/tab-separated-values" },
+  { "label": "Turtle (text/turtle)", "value": "text/turtle" },
+  { "label": "N-Triples", "value": "application/n-triples" },
+  { "label": "N-Quads", "value": "application/n-quads" },
+  { "label": "RDF/XML", "value": "application/rdf+xml" },
+  { "label": "JSON-LD", "value": "application/ld+json" }
+]
