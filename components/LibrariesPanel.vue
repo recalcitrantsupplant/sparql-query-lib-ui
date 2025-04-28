@@ -20,54 +20,62 @@
     <!-- Collapsible Management Section -->
     <transition name="slide-fade">
       <div v-show="isExpanded" class="flex flex-col flex-grow mt-4 border-t pt-4 overflow-hidden"> <!-- Added overflow-hidden for transition -->
-        <!-- Library List -->
-        <h3 class="text-lg font-medium mb-2">Switch / Edit</h3>
-         <!-- Loading State -->
       <div v-if="loading" class="text-center text-gray-500 py-4">Loading libraries...</div>
       <!-- Error State -->
       <div v-else-if="error" class="text-center text-red-500 py-4">Error loading libraries.</div>
       <!-- Library List -->
-      <ul v-else class="flex-grow overflow-y-auto space-y-2 mb-4 pr-2 max-h-48"> <!-- Added max-height for scroll -->
-        <li v-for="library in libraries" :key="library['@id']" class="flex items-center justify-between p-2 border rounded hover:bg-gray-50" :class="{ 'bg-blue-100 border-blue-300': library['@id'] === selectedLibraryId }">
+      <ul v-else class="flex-grow overflow-y-auto space-y-1 mb-4 pr-2 max-h-48"> <!-- Slimmed space-y, kept max-height -->
+        <li
+          v-for="library in libraries"
+          :key="library['@id']"
+          class="flex items-center justify-between py-1 px-2 border rounded cursor-pointer hover:bg-gray-100"
+          :class="{ 'bg-blue-100 border-blue-300 hover:bg-blue-100': library['@id'] === selectedLibraryId }"
+          @click="selectLibrary(library['@id'])"
+        >
           <span class="truncate flex-grow mr-2" :title="library.name">{{ library.name }}</span>
           <div class="flex space-x-1 flex-shrink-0">
-            <Button
-              v-if="library['@id'] !== selectedLibraryId"
-              @click="selectLibrary(library['@id'])"
-              size="sm"
-              variant="outline"
-              :disabled="loading"
-            >
-              Select
-            </Button>
-            <Button @click="editLibrary(library['@id'])" size="sm" variant="ghost" title="Edit Name" :disabled="loading">✏️</Button>
-            <Button @click="deleteLibrary(library['@id'])" size="sm" variant="ghost" class="text-red-500 hover:text-red-700" title="Delete Library" :disabled="loading">🗑️</Button>
+            <!-- Edit/Delete buttons -->
+            <Button @click.stop="editLibrary(library['@id'])" size="sm" title="Edit Name" :disabled="loading" class="h-6 px-2 text-xs w-14 bg-purple-100 text-purple-800 hover:bg-purple-200">Edit</Button>
+            <Button @click.stop="deleteLibrary(library['@id'])" size="sm" class="bg-red-100 hover:bg-red-200 text-red-800 h-6 px-2 text-xs w-14" title="Delete Library" :disabled="loading">Delete</Button>
           </div>
         </li>
-        <li v-if="libraries.length === 0 && !loading" class="text-gray-500 italic">
-          No libraries found. Create one below.
+        <!-- New Library Input Row -->
+        <li class="flex items-center justify-between py-1 px-2 border rounded border-dashed border-gray-400 mt-2">
+           <Input
+             type="text"
+             v-model="newLibraryName"
+             placeholder="Create new library..."
+             class="flex-grow h-7 text-sm mr-2 border-none focus:ring-0 focus:outline-none px-1 py-0"
+             @keyup.enter="handleCreateLibrary"
+             :disabled="loading"
+            />
+            <Button
+              @click="handleCreateLibrary"
+              size="sm"
+              class="h-6 px-2 text-xs w-14 transition-colors duration-150 ease-in-out"
+              :class="{
+               'bg-gray-300 text-gray-600 cursor-not-allowed': loading, // Disabled state when loading
+               'bg-green-100 hover:bg-green-200 text-green-800': !newLibraryName.trim() && !loading, // Softer green when empty
+               'bg-green-200 hover:bg-green-300 text-green-900': newLibraryName.trim() && !loading // Softer green when has text
+             }"
+             :disabled="loading || !newLibraryName.trim()"
+           >
+             Save
+           </Button>
+        </li>
+        <li v-if="libraries.length === 0 && !loading && !newLibraryName" class="text-gray-500 italic text-sm px-2 py-1">
+          No libraries found. Type above to create one.
         </li>
       </ul>
-
-      <!-- Create New Library Section -->
-      <div class="mt-auto pt-4 border-t border-gray-200">
-        <h3 class="text-lg font-medium mb-2">Create New</h3>
-        <div class="flex items-center space-x-2">
-          <Input type="text" v-model="newLibraryName" placeholder="New library name..." class="flex-grow" @keyup.enter="handleCreateLibrary" :disabled="loading" />
-          <Button @click="handleCreateLibrary" :disabled="loading || !newLibraryName.trim()">
-            {{ loading ? 'Creating...' : 'Create' }}
-          </Button>
-        </div>
-         <!-- Display create/update/delete errors -->
-         <p v-if="error" class="text-red-500 text-sm mt-1">{{ error.message }}</p>
-        </div>
+       <!-- Display create/update/delete errors -->
+       <p v-if="error" class="text-red-500 text-sm mt-1 px-2">{{ error.message }}</p>
       </div>
     </transition>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue' // Keep ref for newLibraryName and isExpanded
+import { ref, computed, onMounted, watch } from 'vue' // Added watch
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useLibrariesApi, type Library } from '@/composables/useLibrariesApi'
@@ -90,6 +98,8 @@ const {
 // const selectedLibraryId = ref<string | null>(null) // Removed: Now using global state from useSettings
 const isExpanded = ref(false) // State for expander, default closed
 const newLibraryName = ref('')
+const isCreating = ref(false) // Track creation state for button text/style
+
 // --- End API Integration ---
 
 
@@ -116,36 +126,38 @@ function toggleExpand() {
 
 async function handleCreateLibrary() {
   const trimmedName = newLibraryName.value.trim()
-  if (!trimmedName) {
-    alert('Please enter a library name.')
+  if (!trimmedName || loading.value || isCreating.value) {
     return;
   }
 
-  // Optional: Client-side check for duplicate names before API call
-  // if (libraries.value.some(lib => lib.name.toLowerCase() === trimmedName.toLowerCase())) {
-  //    alert(`A library named "${trimmedName}" already exists.`)
-  //    return;
-  // }
+  isCreating.value = true; // Set creating state
 
-  const newLibrary = await apiCreateLibrary({ name: trimmedName });
-  if (newLibrary) {
-    console.log('Created library:', newLibrary.name);
-    newLibraryName.value = ''; // Clear input
-    // Select the newly created library and collapse
-    setSelectedLibraryId(newLibrary['@id']); // Use global setter
-    isExpanded.value = false // Ensure collapse after creation + selection
+  try {
+    const newLibrary = await apiCreateLibrary({ name: trimmedName });
+    if (newLibrary) {
+      console.log('Created library:', newLibrary.name);
+      newLibraryName.value = ''; // Clear input
+      // Select the newly created library and collapse
+      setSelectedLibraryId(newLibrary['@id']); // Use global setter
+      isExpanded.value = false // Ensure collapse after creation + selection
+    }
+    // Error handling is now primarily via the 'error' ref from the composable
+  } finally {
+    isCreating.value = false; // Reset creating state
   }
-  // Error handling is done within the composable (shows alert)
 }
 
 function selectLibrary(id: string | null) { // Allow null
+  // Prevent selection if clicking on buttons inside the row
+  // The .stop modifier on button clicks should handle this, but double-check if issues arise.
+  if (loading.value) return; // Don't change selection while loading
+
   setSelectedLibraryId(id) // Use global state setter
   console.log('Selected library:', id)
   if (id) {
     isExpanded.value = false // Collapse after selecting
-    // No longer need TODO here, state is global
   } else {
-     // Handle deselection if needed
+     // Handle deselection if needed (e.g., if user could explicitly deselect)
      console.log('Library deselected.')
   }
 }

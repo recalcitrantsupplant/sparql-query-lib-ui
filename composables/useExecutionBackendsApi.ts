@@ -41,7 +41,7 @@ export function useExecutionBackendsApi() {
   const error = ref<Error | null>(null);
 
   // Construct the base URL using the value from settings
-  const API_BASE = computed(() => `${apiUrl.value}/api/backends/`); // Added trailing slash
+  const API_BASE = computed(() => `${apiUrl.value}/api/backends`); // Added trailing slash
 
   // Helper to extract ID from full URI
   const extractId = (fullId: string): string => {

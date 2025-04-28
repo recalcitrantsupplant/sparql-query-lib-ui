@@ -1,1636 +1,1608 @@
 {
-    "openapi": "3.0.3",
-    "info": {
-      "title": "SPARQL Query Library API",
-      "description": "API for managing and running SPARQL queries",
-      "version": "1.0.0"
-    },
-    "components": {
-      "schemas": {
-        "def-0": {
-          "type": "object",
-          "properties": {
-            "id": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "id"
-          ],
-          "title": "paramsSchema"
+  "openapi": "3.0.3",
+  "info": {
+    "title": "SPARQL Query Library API",
+    "description": "API for managing and running SPARQL queries",
+    "version": "1.0.0"
+  },
+  "components": {
+    "schemas": {
+      "def-0": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          }
         },
-        "def-1": {
-          "type": "object",
-          "properties": {
-            "error": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "error"
-          ],
-          "title": "errorMessage"
+        "required": [
+          "id"
+        ],
+        "title": "paramsSchema"
+      },
+      "def-1": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          }
         },
-        "def-2": {
-          "type": "object",
-          "properties": {
-            "@id": {
-              "type": "string",
-              "format": "uri"
-            },
-            "@type": {
-              "type": "string",
-              "enum": [
-                "Backend"
-              ]
-            },
-            "name": {
-              "type": "string"
-            },
-            "description": {
-              "type": "string"
-            },
-            "endpoint": {
-              "type": "string",
-              "format": "uri"
-            },
-            "backendType": {
-              "type": "string",
-              "enum": [
-                "HTTP",
-                "OxigraphMemory"
-              ]
-            },
-            "http://schema.org/dateCreated": {
-              "type": "string",
-              "format": "date-time",
-              "readOnly": true
-            },
-            "http://schema.org/dateModified": {
-              "type": "string",
-              "format": "date-time",
-              "readOnly": true
-            }
+        "required": [
+          "error"
+        ],
+        "title": "errorMessage"
+      },
+      "def-2": {
+        "type": "object",
+        "properties": {
+          "@id": {
+            "type": "string",
+            "format": "uri"
           },
-          "required": [
-            "@id",
-            "@type",
-            "name",
-            "endpoint",
-            "backendType",
-            "http://schema.org/dateCreated",
-            "http://schema.org/dateModified"
-          ],
-          "title": "backend"
-        },
-        "def-3": {
-          "type": "object",
-          "properties": {
-            "name": {
-              "type": "string"
-            },
-            "description": {
-              "type": "string"
-            },
-            "endpoint": {
-              "type": "string",
-              "format": "uri"
-            },
-            "backendType": {
-              "type": "string",
-              "enum": [
-                "HTTP",
-                "OxigraphMemory"
-              ]
-            }
+          "@type": {
+            "type": "string",
+            "enum": [
+              "Backend"
+            ]
           },
-          "additionalProperties": false,
-          "minProperties": 1,
-          "title": "updateBackendBody"
-        },
-        "def-4": {
-          "type": "object",
-          "properties": {
-            "name": {
-              "type": "string"
-            },
-            "description": {
-              "type": "string"
-            },
-            "endpoint": {
-              "type": "string",
-              "format": "uri"
-            },
-            "backendType": {
-              "type": "string",
-              "enum": [
-                "HTTP",
-                "OxigraphMemory"
-              ]
-            },
-            "username": {
-              "type": "string"
-            },
-            "password": {
-              "type": "string"
-            }
+          "name": {
+            "type": "string"
           },
-          "required": [
-            "name",
-            "backendType"
-          ],
-          "additionalProperties": false,
-          "title": "createBackendBody"
-        },
-        "def-5": {
-          "type": "object",
-          "properties": {
-            "query": {
-              "type": "string",
-              "description": "The SPARQL query string to analyze."
-            }
+          "description": {
+            "type": "string"
           },
-          "required": [
-            "query"
-          ],
-          "additionalProperties": false,
-          "title": "detectQueryBody"
+          "endpoint": {
+            "type": "string",
+            "format": "uri"
+          },
+          "backendType": {
+            "type": "string",
+            "enum": [
+              "HTTP",
+              "OxigraphMemory"
+            ]
+          },
+          "http://schema.org/dateCreated": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "http://schema.org/dateModified": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          }
         },
-        "def-6": {
+        "required": [
+          "@id",
+          "@type",
+          "name",
+          "endpoint",
+          "backendType",
+          "http://schema.org/dateCreated",
+          "http://schema.org/dateModified"
+        ],
+        "title": "backend"
+      },
+      "def-3": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "endpoint": {
+            "type": "string",
+            "format": "uri"
+          },
+          "backendType": {
+            "type": "string",
+            "enum": [
+              "HTTP",
+              "OxigraphMemory"
+            ]
+          },
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "minProperties": 1,
+        "title": "updateBackendBody"
+      },
+      "def-4": {
+        "type": "object",
+        "properties": {
+          "@id": {
+            "type": "string",
+            "format": "uri",
+            "description": "Optional: Provide a specific @id for the new backend."
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "endpoint": {
+            "type": "string",
+            "format": "uri"
+          },
+          "backendType": {
+            "type": "string",
+            "enum": [
+              "HTTP",
+              "OxigraphMemory"
+            ]
+          },
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "backendType"
+        ],
+        "additionalProperties": false,
+        "title": "createBackendBody"
+      },
+      "def-5": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "The SPARQL query string to analyze."
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false,
+        "title": "detectQueryBody"
+      },
+      "def-6": {
+        "type": "array",
+        "description": "An array of parameter groups, where each group is an array of variable names.",
+        "items": {
           "type": "array",
-          "description": "An array of parameter groups, where each group is an array of variable names.",
           "items": {
+            "type": "string"
+          }
+        },
+        "title": "detectParametersResponse"
+      },
+      "def-7": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "uri",
+              "literal"
+            ]
+          },
+          "value": {
+            "type": "string"
+          },
+          "datatype": {
+            "type": "string",
+            "format": "uri"
+          },
+          "xml:lang": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "value"
+        ],
+        "title": "argumentValueSchema"
+      },
+      "def-8": {
+        "type": "object",
+        "additionalProperties": {
+          "$ref": "#/components/schemas/def-7"
+        },
+        "title": "argumentRowSchema"
+      },
+      "def-9": {
+        "type": "object",
+        "properties": {
+          "head": {
+            "type": "object",
+            "properties": {
+              "vars": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "vars"
+            ]
+          },
+          "arguments": {
             "type": "array",
             "items": {
-              "type": "string"
+              "$ref": "#/components/schemas/def-8"
             }
-          },
-          "title": "detectParametersResponse"
+          }
         },
-        "def-7": {
-          "type": "object",
-          "properties": {
-            "type": {
+        "required": [
+          "head",
+          "arguments"
+        ],
+        "title": "argumentSetSchema"
+      },
+      "def-10": {
+        "type": "object",
+        "properties": {
+          "targetId": {
+            "description": "The @id of the StoredQuery or QueryGroup to execute.",
+            "type": "string",
+            "format": "uri"
+          },
+          "backendId": {
+            "description": "The @id of the Backend to execute against.",
+            "type": "string",
+            "format": "uri"
+          },
+          "arguments": {
+            "description": "Optional runtime arguments for query parameters, as an array of argument sets.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/def-9"
+            }
+          }
+        },
+        "required": [
+          "targetId",
+          "backendId"
+        ],
+        "title": "executeRequest"
+      },
+      "def-11": {
+        "type": "object",
+        "properties": {
+          "@id": {
+            "type": "string",
+            "format": "uri"
+          },
+          "@type": {
+            "type": "string",
+            "enum": [
+              "Library"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "http://schema.org/dateCreated": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "http://schema.org/dateModified": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          }
+        },
+        "required": [
+          "@id",
+          "@type",
+          "name",
+          "http://schema.org/dateCreated",
+          "http://schema.org/dateModified"
+        ],
+        "title": "library"
+      },
+      "def-12": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "minProperties": 1,
+        "title": "updateLibraryBody"
+      },
+      "def-13": {
+        "type": "object",
+        "properties": {
+          "@id": {
+            "type": "string",
+            "format": "uri",
+            "description": "Optional: Provide a specific @id for the new library."
+          },
+          "name": {
+            "$ref": "#/components/schemas/def-11/properties/name"
+          },
+          "description": {
+            "$ref": "#/components/schemas/def-11/properties/description"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "additionalProperties": false,
+        "title": "createLibraryBody"
+      },
+      "def-14": {
+        "type": "object",
+        "properties": {
+          "@type": {
+            "type": "string",
+            "enum": [
+              "QueryParameter"
+            ]
+          },
+          "paramName": {
+            "type": "string"
+          },
+          "allowedTypes": {
+            "type": "array",
+            "items": {
               "type": "string",
               "enum": [
                 "uri",
                 "literal"
               ]
+            }
+          }
+        },
+        "required": [
+          "@type",
+          "paramName",
+          "allowedTypes"
+        ],
+        "title": "queryParameter"
+      },
+      "def-15": {
+        "type": "object",
+        "properties": {
+          "@type": {
+            "type": "string",
+            "enum": [
+              "QueryParameterGroup"
+            ]
+          },
+          "vars": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/def-14"
+            }
+          }
+        },
+        "required": [
+          "@type",
+          "vars"
+        ],
+        "title": "queryParameterGroup"
+      },
+      "def-16": {
+        "type": "object",
+        "properties": {
+          "@id": {
+            "type": "string",
+            "format": "uri",
+            "description": "Optional: Provide a specific @id for the new query."
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "query": {
+            "type": "string"
+          },
+          "libraryId": {
+            "type": "string",
+            "format": "uri",
+            "description": "The @id of the Library this query belongs to."
+          },
+          "queryGroupId": {
+            "type": "string",
+            "format": "uri",
+            "description": "Optional @id of the QueryGroup this query also belongs to."
+          },
+          "parameters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/def-15"
             },
-            "value": {
+            "nullable": true
+          }
+        },
+        "required": [
+          "name",
+          "query",
+          "libraryId"
+        ],
+        "additionalProperties": false,
+        "title": "createStoredQuery"
+      },
+      "def-17": {
+        "type": "object",
+        "properties": {
+          "@id": {
+            "type": "string",
+            "format": "uri"
+          },
+          "@type": {
+            "type": "string",
+            "enum": [
+              "StoredQuery"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "query": {
+            "type": "string"
+          },
+          "queryType": {
+            "type": "string",
+            "enum": [
+              "SELECT",
+              "CONSTRUCT",
+              "ASK",
+              "UPDATE",
+              "DESCRIBE",
+              "UNKNOWN"
+            ],
+            "readOnly": true
+          },
+          "outputVars": {
+            "type": "array",
+            "items": {
               "type": "string"
             },
-            "datatype": {
-              "type": "string",
-              "format": "uri"
+            "readOnly": true
+          },
+          "parameters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/def-15"
             },
-            "xml:lang": {
-              "type": "string"
+            "nullable": true
+          },
+          "http://schema.org/isPartOf": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/def-19"
+            },
+            "minItems": 1,
+            "readOnly": true
+          },
+          "http://schema.org/dateCreated": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "http://schema.org/dateModified": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          }
+        },
+        "required": [
+          "@id",
+          "@type",
+          "name",
+          "query",
+          "queryType",
+          "http://schema.org/isPartOf",
+          "http://schema.org/dateCreated",
+          "http://schema.org/dateModified"
+        ],
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "queryType": {
+                  "enum": [
+                    "SELECT"
+                  ]
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "outputVars"
+              ]
+            }
+          }
+        ],
+        "title": "storedQuery"
+      },
+      "def-18": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "query": {
+            "type": "string"
+          },
+          "libraryId": {
+            "type": "string",
+            "format": "uri",
+            "description": "Optional: Change the Library this query belongs to."
+          },
+          "queryGroupId": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "Optional: Change or remove the QueryGroup link (use null to remove)."
+          },
+          "parameters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/def-15"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "minProperties": 1,
+        "title": "updateQueryBody"
+      },
+      "def-19": {
+        "type": "object",
+        "properties": {
+          "@id": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "required": [
+          "@id"
+        ],
+        "title": "idReference"
+      },
+      "def-20": {
+        "type": "object",
+        "properties": {
+          "@id": {
+            "type": "string",
+            "format": "uri"
+          },
+          "@type": {
+            "type": "string",
+            "enum": [
+              "NodeParameterMapping"
+            ]
+          },
+          "parameterName": {
+            "type": "string"
+          },
+          "parameterValue": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "@type",
+          "parameterName",
+          "parameterValue"
+        ],
+        "title": "nodeParameterMapping"
+      },
+      "def-21": {
+        "type": "object",
+        "properties": {
+          "@id": {
+            "type": "string",
+            "format": "uri"
+          },
+          "@type": {
+            "type": "string",
+            "enum": [
+              "QueryNode"
+            ]
+          },
+          "queryId": {
+            "type": "string",
+            "format": "uri"
+          },
+          "backendId": {
+            "type": "string",
+            "format": "uri"
+          },
+          "parameterMappings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/def-20"
+            }
+          }
+        },
+        "required": [
+          "@id",
+          "@type",
+          "queryId"
+        ],
+        "title": "queryNode"
+      },
+      "def-22": {
+        "type": "object",
+        "properties": {
+          "@id": {
+            "type": "string",
+            "format": "uri"
+          },
+          "@type": {
+            "type": "string",
+            "enum": [
+              "ParameterMapping"
+            ]
+          },
+          "fromParam": {
+            "type": "string"
+          },
+          "toParam": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "@type",
+          "fromParam",
+          "toParam"
+        ],
+        "title": "parameterMapping"
+      },
+      "def-23": {
+        "type": "object",
+        "properties": {
+          "@id": {
+            "type": "string",
+            "format": "uri"
+          },
+          "@type": {
+            "type": "string",
+            "enum": [
+              "QueryEdge"
+            ]
+          },
+          "fromNodeId": {
+            "type": "string",
+            "format": "uri"
+          },
+          "toNodeId": {
+            "type": "string",
+            "format": "uri"
+          },
+          "mappings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/def-22"
+            }
+          }
+        },
+        "required": [
+          "@type",
+          "fromNodeId",
+          "toNodeId",
+          "mappings"
+        ],
+        "title": "queryEdge"
+      },
+      "def-24": {
+        "type": "object",
+        "properties": {
+          "@id": {
+            "type": "string",
+            "format": "uri"
+          },
+          "@type": {
+            "type": "string",
+            "enum": [
+              "QueryGroup"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "nodes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/def-21"
             }
           },
-          "required": [
-            "type",
-            "value"
-          ],
-          "title": "argumentValueSchema"
-        },
-        "def-8": {
-          "type": "object",
-          "additionalProperties": {
-            "$ref": "#/components/schemas/def-7"
+          "edges": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/def-23"
+            }
           },
-          "title": "argumentRowSchema"
+          "startNodeIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uri"
+            }
+          },
+          "endNodeIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uri"
+            }
+          },
+          "http://schema.org/dateCreated": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "http://schema.org/dateModified": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          }
         },
-        "def-9": {
-          "type": "object",
-          "properties": {
-            "head": {
-              "type": "object",
-              "properties": {
-                "vars": {
+        "required": [
+          "@id",
+          "@type",
+          "name",
+          "http://schema.org/dateCreated",
+          "http://schema.org/dateModified"
+        ],
+        "title": "queryGroup"
+      },
+      "def-25": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "nodes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/def-21"
+            }
+          },
+          "edges": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/def-23"
+            }
+          },
+          "startNodeIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uri"
+            }
+          },
+          "endNodeIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uri"
+            }
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "additionalProperties": false,
+        "title": "createQueryGroupBody"
+      }
+    }
+  },
+  "paths": {
+    "/api/backends/": {
+      "get": {
+        "tags": [
+          "Backend"
+        ],
+        "description": "Get all Backends",
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
                   "type": "array",
                   "items": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/def-2"
                   }
                 }
-              },
-              "required": [
-                "vars"
-              ]
-            },
-            "arguments": {
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/def-8"
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Backend"
+        ],
+        "description": "Create a new Backend. Server generates @id, @type, createdAt, updatedAt.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/def-4"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/def-2"
+                }
               }
             }
           },
-          "required": [
-            "head",
-            "arguments"
-          ],
-          "title": "argumentSetSchema"
-        },
-        "def-10": {
-          "type": "object",
-          "properties": {
-            "targetId": {
-              "description": "The @id of the StoredQuery or QueryGroup to execute.",
-              "type": "string",
-              "format": "uri"
-            },
-            "backendId": {
-              "description": "The @id of the Backend to execute against.",
-              "type": "string",
-              "format": "uri"
-            },
-            "arguments": {
-              "description": "Optional runtime arguments for query parameters, as an array of argument sets.",
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/def-9"
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/def-1"
+                }
               }
             }
           },
-          "required": [
-            "targetId",
-            "backendId"
-          ],
-          "title": "executeRequest"
-        },
-        "def-11": {
-          "type": "object",
-          "properties": {
-            "@id": {
-              "type": "string",
-              "format": "uri"
-            },
-            "@type": {
-              "type": "string",
-              "enum": [
-                "Library"
-              ]
-            },
-            "name": {
-              "type": "string"
-            },
-            "description": {
-              "type": "string"
-            },
-            "http://schema.org/dateCreated": {
-              "type": "string",
-              "format": "date-time",
-              "readOnly": true
-            },
-            "http://schema.org/dateModified": {
-              "type": "string",
-              "format": "date-time",
-              "readOnly": true
-            }
-          },
-          "required": [
-            "@id",
-            "@type",
-            "name",
-            "http://schema.org/dateCreated",
-            "http://schema.org/dateModified"
-          ],
-          "title": "library"
-        },
-        "def-12": {
-          "type": "object",
-          "properties": {
-            "name": {
-              "type": "string"
-            },
-            "description": {
-              "type": "string"
-            }
-          },
-          "additionalProperties": false,
-          "minProperties": 1,
-          "title": "updateLibraryBody"
-        },
-        "def-13": {
-          "type": "object",
-          "properties": {
-            "name": {
-              "$ref": "#/components/schemas/def-11/properties/name"
-            },
-            "description": {
-              "$ref": "#/components/schemas/def-11/properties/description"
-            }
-          },
-          "required": [
-            "name"
-          ],
-          "additionalProperties": false,
-          "title": "createLibraryBody"
-        },
-        "def-14": {
-          "type": "object",
-          "properties": {
-            "@type": {
-              "type": "string",
-              "enum": [
-                "QueryParameter"
-              ]
-            },
-            "paramName": {
-              "type": "string"
-            },
-            "allowedTypes": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "enum": [
-                  "uri",
-                  "literal"
-                ]
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/def-1"
+                }
               }
             }
-          },
-          "required": [
-            "@type",
-            "paramName",
-            "allowedTypes"
-          ],
-          "title": "queryParameter"
-        },
-        "def-15": {
-          "type": "object",
-          "properties": {
-            "@type": {
-              "type": "string",
-              "enum": [
-                "QueryParameterGroup"
-              ]
-            },
-            "vars": {
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/def-14"
-              }
-            }
-          },
-          "required": [
-            "@type",
-            "vars"
-          ],
-          "title": "queryParameterGroup"
-        },
-        "def-16": {
-          "type": "object",
-          "properties": {
-            "name": {
-              "type": "string"
-            },
-            "description": {
-              "type": "string"
-            },
-            "query": {
-              "type": "string"
-            },
-            "libraryId": {
-              "type": "string",
-              "format": "uri",
-              "description": "The @id of the Library this query belongs to."
-            },
-            "queryGroupId": {
-              "type": "string",
-              "format": "uri",
-              "description": "Optional @id of the QueryGroup this query also belongs to."
-            },
-            "parameters": {
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/def-15"
-              },
-              "nullable": true
-            }
-          },
-          "required": [
-            "name",
-            "query",
-            "libraryId"
-          ],
-          "additionalProperties": false,
-          "title": "createStoredQuery"
-        },
-        "def-17": {
-          "type": "object",
-          "properties": {
-            "@id": {
-              "type": "string",
-              "format": "uri"
-            },
-            "@type": {
-              "type": "string",
-              "enum": [
-                "StoredQuery"
-              ]
-            },
-            "name": {
-              "type": "string"
-            },
-            "description": {
-              "type": "string"
-            },
-            "query": {
-              "type": "string"
-            },
-            "queryType": {
-              "type": "string",
-              "enum": [
-                "SELECT",
-                "CONSTRUCT",
-                "ASK",
-                "UPDATE",
-                "DESCRIBE",
-                "UNKNOWN"
-              ],
-              "readOnly": true
-            },
-            "outputVars": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              },
-              "readOnly": true
-            },
-            "parameters": {
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/def-15"
-              },
-              "nullable": true
-            },
-            "http://schema.org/isPartOf": {
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/def-19"
-              },
-              "minItems": 1,
-              "readOnly": true
-            },
-            "http://schema.org/dateCreated": {
-              "type": "string",
-              "format": "date-time",
-              "readOnly": true
-            },
-            "http://schema.org/dateModified": {
-              "type": "string",
-              "format": "date-time",
-              "readOnly": true
-            }
-          },
-          "required": [
-            "@id",
-            "@type",
-            "name",
-            "query",
-            "queryType",
-            "outputVars",
-            "http://schema.org/isPartOf",
-            "http://schema.org/dateCreated",
-            "http://schema.org/dateModified"
-          ],
-          "title": "storedQuery"
-        },
-        "def-18": {
-          "type": "object",
-          "properties": {
-            "name": {
-              "type": "string"
-            },
-            "description": {
-              "type": "string"
-            },
-            "query": {
-              "type": "string"
-            },
-            "libraryId": {
-              "type": "string",
-              "format": "uri",
-              "description": "Optional: Change the Library this query belongs to."
-            },
-            "queryGroupId": {
-              "type": "string",
-              "format": "uri",
-              "nullable": true,
-              "description": "Optional: Change or remove the QueryGroup link (use null to remove)."
-            },
-            "parameters": {
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/def-15"
-              },
-              "nullable": true
-            }
-          },
-          "additionalProperties": false,
-          "minProperties": 1,
-          "title": "updateQueryBody"
-        },
-        "def-19": {
-          "type": "object",
-          "properties": {
-            "@id": {
-              "type": "string",
-              "format": "uri"
-            }
-          },
-          "required": [
-            "@id"
-          ],
-          "title": "idReference"
-        },
-        "def-20": {
-          "type": "object",
-          "properties": {
-            "@id": {
-              "type": "string",
-              "format": "uri"
-            },
-            "@type": {
-              "type": "string",
-              "enum": [
-                "NodeParameterMapping"
-              ]
-            },
-            "parameterName": {
-              "type": "string"
-            },
-            "parameterValue": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "@type",
-            "parameterName",
-            "parameterValue"
-          ],
-          "title": "nodeParameterMapping"
-        },
-        "def-21": {
-          "type": "object",
-          "properties": {
-            "@id": {
-              "type": "string",
-              "format": "uri"
-            },
-            "@type": {
-              "type": "string",
-              "enum": [
-                "QueryNode"
-              ]
-            },
-            "queryId": {
-              "type": "string",
-              "format": "uri"
-            },
-            "backendId": {
-              "type": "string",
-              "format": "uri"
-            },
-            "parameterMappings": {
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/def-20"
-              }
-            }
-          },
-          "required": [
-            "@id",
-            "@type",
-            "queryId"
-          ],
-          "title": "queryNode"
-        },
-        "def-22": {
-          "type": "object",
-          "properties": {
-            "@id": {
-              "type": "string",
-              "format": "uri"
-            },
-            "@type": {
-              "type": "string",
-              "enum": [
-                "ParameterMapping"
-              ]
-            },
-            "fromParam": {
-              "type": "string"
-            },
-            "toParam": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "@type",
-            "fromParam",
-            "toParam"
-          ],
-          "title": "parameterMapping"
-        },
-        "def-23": {
-          "type": "object",
-          "properties": {
-            "@id": {
-              "type": "string",
-              "format": "uri"
-            },
-            "@type": {
-              "type": "string",
-              "enum": [
-                "QueryEdge"
-              ]
-            },
-            "fromNodeId": {
-              "type": "string",
-              "format": "uri"
-            },
-            "toNodeId": {
-              "type": "string",
-              "format": "uri"
-            },
-            "mappings": {
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/def-22"
-              }
-            }
-          },
-          "required": [
-            "@type",
-            "fromNodeId",
-            "toNodeId",
-            "mappings"
-          ],
-          "title": "queryEdge"
-        },
-        "def-24": {
-          "type": "object",
-          "properties": {
-            "@id": {
-              "type": "string",
-              "format": "uri"
-            },
-            "@type": {
-              "type": "string",
-              "enum": [
-                "QueryGroup"
-              ]
-            },
-            "name": {
-              "type": "string"
-            },
-            "description": {
-              "type": "string"
-            },
-            "nodes": {
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/def-21"
-              }
-            },
-            "edges": {
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/def-23"
-              }
-            },
-            "startNodeIds": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "format": "uri"
-              }
-            },
-            "endNodeIds": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "format": "uri"
-              }
-            },
-            "http://schema.org/dateCreated": {
-              "type": "string",
-              "format": "date-time",
-              "readOnly": true
-            },
-            "http://schema.org/dateModified": {
-              "type": "string",
-              "format": "date-time",
-              "readOnly": true
-            }
-          },
-          "required": [
-            "@id",
-            "@type",
-            "name",
-            "http://schema.org/dateCreated",
-            "http://schema.org/dateModified"
-          ],
-          "title": "queryGroup"
-        },
-        "def-25": {
-          "type": "object",
-          "properties": {
-            "name": {
-              "type": "string"
-            },
-            "description": {
-              "type": "string"
-            },
-            "nodes": {
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/def-21"
-              }
-            },
-            "edges": {
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/def-23"
-              }
-            },
-            "startNodeIds": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "format": "uri"
-              }
-            },
-            "endNodeIds": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "format": "uri"
-              }
-            }
-          },
-          "required": [
-            "name"
-          ],
-          "additionalProperties": false,
-          "title": "createQueryGroupBody"
+          }
         }
       }
     },
-    "paths": {
-      "/api/backends/": {
-        "get": {
-          "tags": [
-            "Backend"
-          ],
-          "description": "Get all Backends",
-          "responses": {
-            "200": {
-              "description": "Default Response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "type": "array",
-                    "items": {
-                      "$ref": "#/components/schemas/def-2"
-                    }
-                  }
-                }
-              }
-            }
+    "/api/backends/{id}": {
+      "get": {
+        "tags": [
+          "Backend"
+        ],
+        "description": "Get a specific Backend by ID",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
           }
-        },
-        "post": {
-          "tags": [
-            "Backend"
-          ],
-          "description": "Create a new Backend. Server generates @id, @type, createdAt, updatedAt.",
-          "requestBody": {
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/def-4"
+                  "$ref": "#/components/schemas/def-2"
                 }
               }
             }
           },
-          "responses": {
-            "201": {
-              "description": "Default Response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/def-2"
-                  }
-                }
-              }
-            },
-            "400": {
-              "description": "Default Response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/def-1"
-                  }
-                }
-              }
-            },
-            "409": {
-              "description": "Default Response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/def-1"
-                  }
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/def-1"
                 }
               }
             }
           }
         }
       },
-      "/api/backends/{id}": {
-        "get": {
-          "tags": [
-            "Backend"
-          ],
-          "description": "Get a specific Backend by ID",
-          "parameters": [
-            {
+      "put": {
+        "tags": [
+          "Backend"
+        ],
+        "description": "Update an existing Backend",
+        "requestBody": {
+          "content": {
+            "application/json": {
               "schema": {
-                "type": "string"
-              },
-              "in": "path",
-              "name": "id",
-              "required": true
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "Default Response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/def-2"
-                  }
-                }
-              }
-            },
-            "404": {
-              "description": "Default Response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/def-1"
-                  }
-                }
+                "$ref": "#/components/schemas/def-3"
               }
             }
           }
         },
-        "put": {
-          "tags": [
-            "Backend"
-          ],
-          "description": "Update an existing Backend",
-          "requestBody": {
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/def-3"
+                  "$ref": "#/components/schemas/def-2"
                 }
               }
             }
           },
-          "parameters": [
-            {
-              "schema": {
-                "type": "string"
-              },
-              "in": "path",
-              "name": "id",
-              "required": true
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "Default Response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/def-2"
-                  }
-                }
-              }
-            },
-            "400": {
-              "description": "Default Response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/def-1"
-                  }
-                }
-              }
-            },
-            "404": {
-              "description": "Default Response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/def-1"
-                  }
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/def-1"
                 }
               }
             }
-          }
-        },
-        "delete": {
-          "tags": [
-            "Backend"
-          ],
-          "description": "Delete a Backend by ID",
-          "parameters": [
-            {
-              "schema": {
-                "type": "string"
-              },
-              "in": "path",
-              "name": "id",
-              "required": true
-            }
-          ],
-          "responses": {
-            "204": {
-              "description": "Default Response"
-            },
-            "404": {
-              "description": "Default Response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/def-1"
-                  }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/def-1"
                 }
               }
             }
           }
         }
       },
-      "/api/queries/": {
-        "post": {
-          "tags": [
-            "Query"
-          ],
-          "description": "Create a new StoredQuery. Server generates queryType, outputVars, parameters (if not provided), createdAt, updatedAt.",
-          "requestBody": {
+      "delete": {
+        "tags": [
+          "Backend"
+        ],
+        "description": "Delete a Backend by ID",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Default Response"
+          },
+          "404": {
+            "description": "Default Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/def-16"
+                  "$ref": "#/components/schemas/def-1"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/queries/": {
+      "post": {
+        "tags": [
+          "Query"
+        ],
+        "description": "Create a new StoredQuery. Server generates queryType, outputVars, parameters (if not provided), createdAt, updatedAt.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/def-16"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/def-17"
                 }
               }
             }
           },
-          "responses": {
-            "201": {
-              "description": "Default Response",
-              "content": {
-                "application/json": {
-                  "schema": {
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/def-1"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/def-1"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/def-1"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Query"
+        ],
+        "description": "Get all StoredQueries, optionally filtered by libraryId",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uri"
+            },
+            "in": "query",
+            "name": "libraryId",
+            "required": false,
+            "description": "Optional: Filter queries belonging to this Library @id."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
                     "$ref": "#/components/schemas/def-17"
                   }
                 }
               }
-            },
-            "400": {
-              "description": "Default Response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/def-1"
-                  }
+            }
+          },
+          "500": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/def-1"
                 }
               }
+            }
+          }
+        }
+      }
+    },
+    "/api/queries/{id}": {
+      "get": {
+        "tags": [
+          "Query"
+        ],
+        "description": "Get a specific StoredQuery by ID",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
             },
-            "409": {
-              "description": "Default Response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/def-1"
-                  }
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/def-17"
                 }
               }
-            },
-            "500": {
-              "description": "Default Response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/def-1"
-                  }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/def-1"
                 }
+              }
+            }
+          },
+          "500": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/def-1"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Query"
+        ],
+        "description": "Update an existing StoredQuery. Server recalculates queryType, outputVars, and parameters (if query changes and parameters not provided). Updates updatedAt.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/def-18"
               }
             }
           }
         },
-        "get": {
-          "tags": [
-            "Query"
-          ],
-          "description": "Get all StoredQueries, optionally filtered by libraryId",
-          "parameters": [
-            {
-              "schema": {
-                "type": "string",
-                "format": "uri"
-              },
-              "in": "query",
-              "name": "libraryId",
-              "required": false,
-              "description": "Optional: Filter queries belonging to this Library @id."
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "Default Response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "type": "array",
-                    "items": {
-                      "$ref": "#/components/schemas/def-17"
-                    }
-                  }
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/def-17"
                 }
               }
-            },
-            "500": {
-              "description": "Default Response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/def-1"
-                  }
+            }
+          },
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/def-1"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/def-1"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/def-1"
                 }
               }
             }
           }
         }
       },
-      "/api/queries/{id}": {
-        "get": {
-          "tags": [
-            "Query"
-          ],
-          "description": "Get a specific StoredQuery by ID",
-          "parameters": [
-            {
-              "schema": {
-                "type": "string"
-              },
-              "in": "path",
-              "name": "id",
-              "required": true
+      "delete": {
+        "tags": [
+          "Query"
+        ],
+        "description": "Delete a StoredQuery by ID",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Default Response"
+          },
+          "500": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/def-1"
+                }
+              }
             }
-          ],
-          "responses": {
-            "200": {
-              "description": "Default Response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/def-17"
-                  }
-                }
-              }
-            },
-            "404": {
-              "description": "Default Response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/def-1"
-                  }
-                }
-              }
-            },
-            "500": {
-              "description": "Default Response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/def-1"
-                  }
-                }
+          }
+        }
+      }
+    },
+    "/api/queries/detect-parameters": {
+      "post": {
+        "tags": [
+          "Query",
+          "Utility"
+        ],
+        "description": "Detect parameter groups (variables marked with UNDEF in VALUES clauses) in a SPARQL query.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/def-5"
               }
             }
           }
         },
-        "put": {
-          "tags": [
-            "Query"
-          ],
-          "description": "Update an existing StoredQuery. Server recalculates queryType, outputVars, and parameters (if query changes and parameters not provided). Updates updatedAt.",
-          "requestBody": {
+        "responses": {
+          "200": {
+            "description": "An array of parameter groups, where each group is an array of variable names.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/def-18"
+                  "$ref": "#/components/schemas/def-6"
                 }
               }
             }
           },
-          "parameters": [
-            {
-              "schema": {
-                "type": "string"
-              },
-              "in": "path",
-              "name": "id",
-              "required": true
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/def-1"
+                }
+              }
             }
-          ],
-          "responses": {
-            "200": {
-              "description": "Default Response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/def-17"
-                  }
+          },
+          "500": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/def-1"
                 }
               }
-            },
-            "400": {
-              "description": "Default Response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/def-1"
-                  }
-                }
-              }
-            },
-            "404": {
-              "description": "Default Response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/def-1"
-                  }
-                }
-              }
-            },
-            "500": {
-              "description": "Default Response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/def-1"
-                  }
-                }
+            }
+          }
+        }
+      }
+    },
+    "/api/queries/detect-outputs": {
+      "post": {
+        "tags": [
+          "Query",
+          "Utility"
+        ],
+        "description": "Detect output variables or aliased expressions in a SELECT query.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/def-5"
               }
             }
           }
         },
-        "delete": {
-          "tags": [
-            "Query"
-          ],
-          "description": "Delete a StoredQuery by ID",
-          "parameters": [
-            {
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/def-17/properties/outputVars"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/def-1"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/def-1"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/libraries/": {
+      "post": {
+        "tags": [
+          "Library"
+        ],
+        "description": "Create a new Library. Server generates @id, @type, createdAt, updatedAt.",
+        "requestBody": {
+          "content": {
+            "application/json": {
               "schema": {
-                "type": "string"
-              },
-              "in": "path",
-              "name": "id",
-              "required": true
+                "$ref": "#/components/schemas/def-13"
+              }
             }
-          ],
-          "responses": {
-            "204": {
-              "description": "Default Response"
-            },
-            "500": {
-              "description": "Default Response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/def-1"
-                  }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/def-11"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/def-1"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/def-1"
                 }
               }
             }
           }
         }
       },
-      "/api/queries/detect-parameters": {
-        "post": {
-          "tags": [
-            "Query",
-            "Utility"
-          ],
-          "description": "Detect parameter groups (variables marked with UNDEF in VALUES clauses) in a SPARQL query.",
-          "requestBody": {
+      "get": {
+        "tags": [
+          "Library"
+        ],
+        "description": "Get all Libraries",
+        "responses": {
+          "200": {
+            "description": "Default Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/def-5"
-                }
-              }
-            }
-          },
-          "responses": {
-            "200": {
-              "description": "An array of parameter groups, where each group is an array of variable names.",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/def-6"
-                  }
-                }
-              }
-            },
-            "400": {
-              "description": "Default Response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/def-1"
-                  }
-                }
-              }
-            },
-            "500": {
-              "description": "Default Response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/def-1"
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "/api/queries/detect-outputs": {
-        "post": {
-          "tags": [
-            "Query",
-            "Utility"
-          ],
-          "description": "Detect output variables or aliased expressions in a SELECT query.",
-          "requestBody": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/def-5"
-                }
-              }
-            }
-          },
-          "responses": {
-            "200": {
-              "description": "Default Response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/def-17/properties/outputVars"
-                  }
-                }
-              }
-            },
-            "400": {
-              "description": "Default Response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/def-1"
-                  }
-                }
-              }
-            },
-            "500": {
-              "description": "Default Response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/def-1"
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "/api/libraries/": {
-        "post": {
-          "tags": [
-            "Library"
-          ],
-          "description": "Create a new Library. Server generates @id, @type, createdAt, updatedAt.",
-          "requestBody": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/def-13"
-                }
-              }
-            }
-          },
-          "responses": {
-            "201": {
-              "description": "Default Response",
-              "content": {
-                "application/json": {
-                  "schema": {
+                  "type": "array",
+                  "items": {
                     "$ref": "#/components/schemas/def-11"
                   }
                 }
               }
+            }
+          }
+        }
+      }
+    },
+    "/api/libraries/{id}": {
+      "get": {
+        "tags": [
+          "Library"
+        ],
+        "description": "Get a specific Library by ID",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
             },
-            "400": {
-              "description": "Default Response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/def-1"
-                  }
-                }
-              }
-            },
-            "409": {
-              "description": "Default Response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/def-1"
-                  }
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/def-11"
                 }
               }
             }
-          }
-        },
-        "get": {
-          "tags": [
-            "Library"
-          ],
-          "description": "Get all Libraries",
-          "responses": {
-            "200": {
-              "description": "Default Response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "type": "array",
-                    "items": {
-                      "$ref": "#/components/schemas/def-11"
-                    }
-                  }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/def-1"
                 }
               }
             }
           }
         }
       },
-      "/api/libraries/{id}": {
-        "get": {
-          "tags": [
-            "Library"
-          ],
-          "description": "Get a specific Library by ID",
-          "parameters": [
-            {
+      "put": {
+        "tags": [
+          "Library"
+        ],
+        "description": "Update an existing Library",
+        "requestBody": {
+          "content": {
+            "application/json": {
               "schema": {
-                "type": "string"
-              },
-              "in": "path",
-              "name": "id",
-              "required": true
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "Default Response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/def-11"
-                  }
-                }
-              }
-            },
-            "404": {
-              "description": "Default Response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/def-1"
-                  }
-                }
+                "$ref": "#/components/schemas/def-12"
               }
             }
           }
         },
-        "put": {
-          "tags": [
-            "Library"
-          ],
-          "description": "Update an existing Library",
-          "requestBody": {
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/def-12"
+                  "$ref": "#/components/schemas/def-11"
                 }
               }
             }
           },
-          "parameters": [
-            {
-              "schema": {
-                "type": "string"
-              },
-              "in": "path",
-              "name": "id",
-              "required": true
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "Default Response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/def-11"
-                  }
-                }
-              }
-            },
-            "400": {
-              "description": "Default Response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/def-1"
-                  }
-                }
-              }
-            },
-            "404": {
-              "description": "Default Response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/def-1"
-                  }
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/def-1"
                 }
               }
             }
-          }
-        },
-        "delete": {
-          "tags": [
-            "Library"
-          ],
-          "description": "Delete a Library by ID",
-          "parameters": [
-            {
-              "schema": {
-                "type": "string"
-              },
-              "in": "path",
-              "name": "id",
-              "required": true
-            }
-          ],
-          "responses": {
-            "204": {
-              "description": "Default Response"
-            },
-            "404": {
-              "description": "Default Response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/def-1"
-                  }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/def-1"
                 }
               }
             }
           }
         }
       },
-      "/api/queryGroups/": {
-        "get": {
-          "tags": [
-            "QueryGroup"
-          ],
-          "description": "Get all QueryGroups",
-          "responses": {
-            "200": {
-              "description": "Default Response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "type": "array",
-                    "items": {
-                      "$ref": "#/components/schemas/def-24"
-                    }
-                  }
+      "delete": {
+        "tags": [
+          "Library"
+        ],
+        "description": "Delete a Library by ID",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Default Response"
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/def-1"
                 }
               }
             }
           }
-        },
-        "post": {
-          "tags": [
-            "QueryGroup"
-          ],
-          "description": "Create a new QueryGroup. Server generates @id and @type.",
-          "requestBody": {
+        }
+      }
+    },
+    "/api/queryGroups/": {
+      "get": {
+        "tags": [
+          "QueryGroup"
+        ],
+        "description": "Get all QueryGroups",
+        "responses": {
+          "200": {
+            "description": "Default Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/def-25"
-                }
-              }
-            }
-          },
-          "responses": {
-            "201": {
-              "description": "Default Response",
-              "content": {
-                "application/json": {
-                  "schema": {
+                  "type": "array",
+                  "items": {
                     "$ref": "#/components/schemas/def-24"
                   }
                 }
               }
-            },
-            "400": {
-              "description": "Default Response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/def-1"
-                  }
-                }
-              }
             }
           }
         }
       },
-      "/api/queryGroups/{id}": {
-        "get": {
-          "tags": [
-            "QueryGroup"
-          ],
-          "description": "Get a specific QueryGroup by ID",
-          "parameters": [
-            {
+      "post": {
+        "tags": [
+          "QueryGroup"
+        ],
+        "description": "Create a new QueryGroup. Server generates @id and @type.",
+        "requestBody": {
+          "content": {
+            "application/json": {
               "schema": {
-                "type": "string"
-              },
-              "in": "path",
-              "name": "id",
-              "required": true
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "Default Response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/def-24"
-                  }
-                }
-              }
-            },
-            "404": {
-              "description": "Default Response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/def-1"
-                  }
-                }
+                "$ref": "#/components/schemas/def-25"
               }
             }
           }
         },
-        "put": {
-          "tags": [
-            "QueryGroup"
-          ],
-          "description": "Update an existing QueryGroup",
-          "requestBody": {
+        "responses": {
+          "201": {
+            "description": "Default Response",
             "content": {
               "application/json": {
                 "schema": {
@@ -1639,156 +1611,12 @@
               }
             }
           },
-          "parameters": [
-            {
-              "schema": {
-                "type": "string"
-              },
-              "in": "path",
-              "name": "id",
-              "required": true
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "Default Response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/def-24"
-                  }
-                }
-              }
-            },
-            "400": {
-              "description": "Default Response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/def-1"
-                  }
-                }
-              }
-            },
-            "404": {
-              "description": "Default Response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/def-1"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "delete": {
-          "tags": [
-            "QueryGroup"
-          ],
-          "description": "Delete a QueryGroup by ID",
-          "parameters": [
-            {
-              "schema": {
-                "type": "string"
-              },
-              "in": "path",
-              "name": "id",
-              "required": true
-            }
-          ],
-          "responses": {
-            "204": {
-              "description": "Default Response"
-            },
-            "404": {
-              "description": "Default Response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/def-1"
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "/api/execute/": {
-        "post": {
-          "tags": [
-            "Execution"
-          ],
-          "description": "Execute a StoredQuery (or QueryGroup - future) against a Backend.",
-          "requestBody": {
+          "400": {
+            "description": "Default Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/def-10"
-                }
-              }
-            }
-          },
-          "responses": {
-            "200": {
-              "description": "SPARQL Query Results (JSON format)",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "description": "SPARQL Query Results (JSON format)",
-                    "type": "object",
-                    "additionalProperties": true
-                  }
-                }
-              }
-            },
-            "400": {
-              "description": "Default Response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/def-1"
-                  }
-                }
-              }
-            },
-            "404": {
-              "description": "Default Response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/def-1"
-                  }
-                }
-              }
-            },
-            "500": {
-              "description": "Default Response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/def-1"
-                  }
-                }
-              }
-            },
-            "501": {
-              "description": "Default Response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/def-1"
-                  }
-                }
-              }
-            },
-            "502": {
-              "description": "Default Response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/def-1"
-                  }
+                  "$ref": "#/components/schemas/def-1"
                 }
               }
             }
@@ -1796,30 +1624,240 @@
         }
       }
     },
-    "tags": [
-      {
-        "name": "Backend",
-        "description": "Routes for managing SPARQL backends"
+    "/api/queryGroups/{id}": {
+      "get": {
+        "tags": [
+          "QueryGroup"
+        ],
+        "description": "Get a specific QueryGroup by ID",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/def-24"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/def-1"
+                }
+              }
+            }
+          }
+        }
       },
-      {
-        "name": "Query",
-        "description": "Routes for managing SPARQL queries"
+      "put": {
+        "tags": [
+          "QueryGroup"
+        ],
+        "description": "Update an existing QueryGroup",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/def-24"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/def-24"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/def-1"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/def-1"
+                }
+              }
+            }
+          }
+        }
       },
-      {
-        "name": "Library",
-        "description": "Routes for managing Query Libraries"
-      },
-      {
-        "name": "QueryGroup",
-        "description": "Routes for managing Query Groups"
-      },
-      {
-        "name": "Execution",
-        "description": "Routes for executing queries"
+      "delete": {
+        "tags": [
+          "QueryGroup"
+        ],
+        "description": "Delete a QueryGroup by ID",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Default Response"
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/def-1"
+                }
+              }
+            }
+          }
+        }
       }
-    ],
-    "externalDocs": {
-      "url": "https://swagger.io",
-      "description": "Find more info here"
+    },
+    "/api/execute/": {
+      "post": {
+        "tags": [
+          "Execution"
+        ],
+        "description": "Execute a StoredQuery (or QueryGroup - future) against a Backend.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/def-10"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "SPARQL Query Results (JSON format)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "SPARQL Query Results (JSON format)",
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/def-1"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/def-1"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/def-1"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/def-1"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/def-1"
+                }
+              }
+            }
+          }
+        }
+      }
     }
+  },
+  "tags": [
+    {
+      "name": "Backend",
+      "description": "Routes for managing SPARQL backends"
+    },
+    {
+      "name": "Query",
+      "description": "Routes for managing SPARQL queries"
+    },
+    {
+      "name": "Library",
+      "description": "Routes for managing Query Libraries"
+    },
+    {
+      "name": "QueryGroup",
+      "description": "Routes for managing Query Groups"
+    },
+    {
+      "name": "Execution",
+      "description": "Routes for executing queries"
+    }
+  ],
+  "externalDocs": {
+    "url": "https://swagger.io",
+    "description": "Find more info here"
   }
+}

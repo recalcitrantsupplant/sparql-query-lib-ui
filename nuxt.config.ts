@@ -5,7 +5,13 @@ export default defineNuxtConfig({
   ssr: false,
   compatibilityDate: '2024-11-01',
   devtools: { enabled: true },
-  css: ['~/assets/css/tailwind.css'],
+  css: [
+    '~/assets/css/tailwind.css',
+    '@vue-flow/core/dist/style.css',
+    '@vue-flow/core/dist/theme-default.css',
+    '@vue-flow/controls/dist/style.css',
+    '@vue-flow/minimap/dist/style.css',
+  ],
   modules: ['shadcn-nuxt'],
   shadcn: {
     /**

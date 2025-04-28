@@ -5,7 +5,7 @@ import { useLocalStorage } from '@vueuse/core'
 // Define keys for localStorage
 const STORAGE_KEY_API_URL = 'backend-api-url'
 const STORAGE_KEY_LIBRARY_ID = 'selected-library-id'
-const DEFAULT_API_URL = 'http://localhost:3000'
+const DEFAULT_API_URL = 'http://localhost:3050'
 
 export function useSettings() {
   // --- API URL State ---
