@@ -31,5 +31,11 @@ export default defineNuxtConfig({
   },
   devServer: {
     port: 3001
+  },
+  runtimeConfig: {
+    // Public keys are exposed to the client-side
+    public: {
+      apiUrl: process.env.NUXT_PUBLIC_API_URL || 'http://localhost:3050' // Default value if env var not set
+    }
   }
 })

@@ -1,15 +1,19 @@
-import { useState } from '#app'
+import { useState, useRuntimeConfig } from '#app'
 import { watch } from 'vue'
 import { useLocalStorage } from '@vueuse/core'
 
 // Define keys for localStorage
 const STORAGE_KEY_API_URL = 'backend-api-url'
 const STORAGE_KEY_LIBRARY_ID = 'selected-library-id'
-const DEFAULT_API_URL = 'http://localhost:3050'
+// DEFAULT_API_URL is now sourced from runtime config
 
 export function useSettings() {
+  const config = useRuntimeConfig()
+  const defaultApiUrlFromConfig = config.public.apiUrl as string
+
   // --- API URL State ---
-  const apiUrl = useState<string>(STORAGE_KEY_API_URL, () => localStorage.getItem(STORAGE_KEY_API_URL) || DEFAULT_API_URL)
+  // Initialize with localStorage value, fallback to runtime config default
+  const apiUrl = useState<string>(STORAGE_KEY_API_URL, () => localStorage.getItem(STORAGE_KEY_API_URL) || defaultApiUrlFromConfig)
   const storedApiUrl = useLocalStorage<string>(STORAGE_KEY_API_URL, apiUrl.value)
 
   watch(apiUrl, (newValue) => {
@@ -25,14 +29,14 @@ export function useSettings() {
     const trimmedUrl = newUrl.trim()
     if (trimmedUrl && (trimmedUrl.startsWith('http://') || trimmedUrl.startsWith('https://'))) {
        // Remove trailing slash if present
-       apiUrl.value = trimmedUrl.replace(/\/$/, '')
-    } else {
-       // Revert to default if invalid or empty
-       apiUrl.value = DEFAULT_API_URL
-       console.warn(`Invalid API URL provided: "${newUrl}". Reverting to default: "${DEFAULT_API_URL}"`)
-    }
-  }
-  // --- End API URL State ---
+        apiUrl.value = trimmedUrl.replace(/\/$/, '')
+     } else {
+        // Revert to default if invalid or empty
+        apiUrl.value = defaultApiUrlFromConfig
+        console.warn(`Invalid API URL provided: "${newUrl}". Reverting to default: "${defaultApiUrlFromConfig}"`)
+     }
+   }
+   // --- End API URL State ---
 
   // --- Selected Library ID State ---
   const selectedLibraryId = useState<string | null>(STORAGE_KEY_LIBRARY_ID, () => localStorage.getItem(STORAGE_KEY_LIBRARY_ID) || null)
