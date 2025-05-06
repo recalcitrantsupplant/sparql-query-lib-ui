@@ -129,7 +129,7 @@
 
     <!-- Arguments Input Box -->
     <QueryArgumentsInput
-      :parameters="props.parameters"
+      :parameters="detectedParameters"
       :model-value="props.modelValue"
       @update:modelValue="handleArgumentsUpdate"
       :class="{ 'opacity-50 pointer-events-none': hasParseError || isEditingQuery }"
@@ -182,7 +182,7 @@ const props = defineProps<{
   code: string;
   isEditingQuery: boolean;
   // Props for QueryArgumentsInput
-  parameters: DetectedParametersResponse | null; // Use the existing interface
+  // parameters: DetectedParametersResponse | null; // Removed - Sidebar fetches its own
   modelValue: QueryArgumentsModel; // Use the re-defined interface
 }>();
 

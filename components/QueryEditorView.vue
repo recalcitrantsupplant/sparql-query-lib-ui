@@ -1,3 +1,4 @@
+
 <template>
   <div class="flex flex-col flex-grow overflow-hidden">
     <!-- Static Header -->
@@ -81,7 +82,6 @@
         ref="analysisSidebarRef"
         :code="code"
         :isEditingQuery="isEditingQuery"
-        :parameters="analysisSidebarRef?.detectedParameters ?? null"
         :model-value="props.queryArguments"
         @update:modelValue="handleArgumentsUpdate"
       />
