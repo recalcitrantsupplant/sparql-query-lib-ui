@@ -129,7 +129,7 @@
 
     <!-- Arguments Input Box -->
     <QueryArgumentsInput
-      :parameters="detectedParameters"
+      :parameters="parametersForInput"
       :model-value="props.modelValue"
       @update:modelValue="handleArgumentsUpdate"
       :class="{ 'opacity-50 pointer-events-none': hasParseError || isEditingQuery }"
@@ -286,6 +286,16 @@ const triggerAnalysis = async (queryText: string) => {
 
 // Debounced code for analysis
 const codeForAnalysis = refDebounced(computed(() => props.code), 300);
+
+// --- Computed ---
+// Ensure parametersForInput provides a valid default for QueryArgumentsInput
+const parametersForInput = computed<DetectedParametersResponse>(() => {
+  return detectedParameters.value ?? {
+    valuesParameters: [],
+    limitParameters: [],
+    offsetParameters: []
+  };
+});
 
 // --- Watchers ---
 watch(codeForAnalysis, (newQueryText) => {

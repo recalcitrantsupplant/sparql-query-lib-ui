@@ -1,14 +1,14 @@
 import { ref, watch, onMounted, nextTick, type Ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useSettings } from '@/composables/useSettings';
-import type { Query, QueryGroup } from '@/types/query';
+import type { Query, QueryGroup, QueryArgumentsModel } from '@/types/query'; // Import QueryArgumentsModel
 
 // Define the types for the parameters the composable accepts
 interface UseUrlStateSyncOptions {
   selectedQuery: Ref<Query | null>;
   selectedQueryGroup: Ref<QueryGroup | null>; // Add selected query group ref
   viewMode: Ref<'query' | 'group'>;
-  queryArguments: Ref<Record<string, any>>;
+  queryArguments: Ref<QueryArgumentsModel>; // Use QueryArgumentsModel
 }
 
 export function useUrlStateSync({ selectedQuery, selectedQueryGroup, viewMode, queryArguments }: UseUrlStateSyncOptions) {
@@ -20,7 +20,7 @@ export function useUrlStateSync({ selectedQuery, selectedQueryGroup, viewMode, q
   const initialLibraryIdFromUrl = ref<string | null>(null);
   const initialQueryIdFromUrl = ref<string | null>(null);
   const initialGroupIdFromUrl = ref<string | null>(null); // Add ref for initial group ID
-  const initialArgumentsFromUrl = ref<Record<string, any> | null>(null);
+  const initialArgumentsFromUrl = ref<QueryArgumentsModel | null>(null); // Use QueryArgumentsModel
   const isInitialLoadComplete = ref(false); // Flag to prevent updates during initial load
 
   // --- Session Storage Logic ---
@@ -34,7 +34,7 @@ export function useUrlStateSync({ selectedQuery, selectedQueryGroup, viewMode, q
     const key = getSessionStorageKey(libraryId, queryId);
     if (!key) return;
 
-    if (args && Object.keys(args).length > 0) {
+    if (args && (Object.keys(args.values).length > 0 || Object.keys(args.limit).length > 0 || Object.keys(args.offset).length > 0)) {
       try {
         sessionStorage.setItem(key, JSON.stringify(args));
         console.log(`useUrlStateSync: Saved args to sessionStorage for key: ${key}`);
@@ -47,7 +47,7 @@ export function useUrlStateSync({ selectedQuery, selectedQueryGroup, viewMode, q
     }
   };
 
-  const loadArgsFromSession = (libraryId: string | null, queryId: string | null): Record<string, any> | null => {
+  const loadArgsFromSession = (libraryId: string | null, queryId: string | null): QueryArgumentsModel | null => {
     const key = getSessionStorageKey(libraryId, queryId);
     if (!key) return null;
 
@@ -81,12 +81,12 @@ export function useUrlStateSync({ selectedQuery, selectedQueryGroup, viewMode, q
     const currentLibraryId = selectedLibraryId.value;
     const currentQueryId = isQueryView ? selectedQuery.value?.['@id'] : undefined;
     const currentGroupId = isGroupView ? selectedQueryGroup.value?.['@id'] : undefined; // Get current group ID
-    const currentArgs = queryArguments.value;
+    const currentArgs = queryArguments.value; // This is QueryArgumentsModel
     let serializedUrlArgs: string | undefined = undefined;
     let shouldUpdateUrl = false;
 
     // --- URL Args Serialization ---
-    if (isQueryView && currentQueryId && currentArgs && Object.keys(currentArgs).length > 0) {
+    if (isQueryView && currentQueryId && currentArgs && (Object.keys(currentArgs.values).length > 0 || Object.keys(currentArgs.limit).length > 0 || Object.keys(currentArgs.offset).length > 0)) {
       try {
         serializedUrlArgs = btoa(JSON.stringify(currentArgs));
       } catch (error) {
@@ -197,10 +197,10 @@ export function useUrlStateSync({ selectedQuery, selectedQueryGroup, viewMode, q
             // Update the main arguments ref if different from current
             // Compare stringified versions to handle object reference differences
             const currentArgsString = JSON.stringify(queryArguments.value);
-            const loadedArgsString = JSON.stringify(loadedArgs ?? {});
+            const loadedArgsString = JSON.stringify(loadedArgs ?? { values: {}, limit: {}, offset: {} });
             if (currentArgsString !== loadedArgsString) {
-                console.log("useUrlStateSync: Updating queryArguments ref with loaded args:", loadedArgs ?? {});
-                queryArguments.value = loadedArgs ?? {};
+                console.log("useUrlStateSync: Updating queryArguments ref with loaded args:", loadedArgs ?? { values: {}, limit: {}, offset: {} });
+                queryArguments.value = loadedArgs ?? { values: {}, limit: {}, offset: {} };
                 // No need to call updateState() here, the main watcher will pick up the change to queryArguments.value
             } else {
                  console.log("useUrlStateSync: Loaded args are the same as current args, no update needed.");
@@ -233,7 +233,7 @@ export function useUrlStateSync({ selectedQuery, selectedQueryGroup, viewMode, q
     // 3. Determine initial arguments based on QSA priority (only relevant for query view)
     console.log("useUrlStateSync: --- Determining Initial Arguments (for Query View) ---");
     const urlArgs = currentRouteQuery.args as string | undefined;
-    let loadedArgs: Record<string, any> | null = null;
+    let loadedArgs: QueryArgumentsModel | null = null; // Use QueryArgumentsModel
     let loadedFrom: string = 'none';
 
     // Use the stored initial IDs for checking conditions and loading from session

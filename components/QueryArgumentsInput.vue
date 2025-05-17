@@ -26,15 +26,15 @@
                    <Input
                      :model-value="row[paramName].value"
                      :placeholder="paramName"
-                     class="w-full text-sm h-8"
+                     class="w-full text-sm"
                      @update:model-value="updateValueArgumentValue(paramName, rowIndex, String($event))"
                    />
                  </div>
                  <!-- Type Toggle Button -->
                  <div class="flex-shrink-0">
-                   <div class="flex text-xs border rounded overflow-hidden items-center h-8">
+                   <div class="flex text-xs border rounded overflow-hidden items-center">
                      <span
-                       class="px-1.5 py-1 cursor-pointer flex items-center h-full"
+                       class="px-1.5 py-1 cursor-pointer flex items-center"
                        :class="{ 'bg-blue-500 text-white': row[paramName].type === 'literal', 'bg-gray-100 hover:bg-gray-200': row[paramName].type !== 'literal' }"
                        @click="updateValueArgumentType(paramName, rowIndex, 'literal')"
                        title="Set type to Literal"
@@ -42,7 +42,7 @@
                        Lit
                      </span>
                      <span
-                       class="px-1.5 py-1 cursor-pointer flex items-center h-full border-l"
+                       class="px-1.5 py-1 cursor-pointer flex items-center border-l"
                        :class="{ 'bg-blue-500 text-white': row[paramName].type === 'uri', 'bg-gray-100 hover:bg-gray-200': row[paramName].type !== 'uri' }"
                        @click="updateValueArgumentType(paramName, rowIndex, 'uri')"
                        title="Set type to URI"

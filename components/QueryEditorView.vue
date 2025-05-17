@@ -1,4 +1,3 @@
-
 <template>
   <div class="flex flex-col flex-grow overflow-hidden">
     <!-- Static Header -->
@@ -27,12 +26,12 @@
       <!-- Left part: Details, Editor and Results (takes more space, e.g., 2/3) -->
       <div class="flex flex-col flex-grow overflow-y-auto" style="flex-basis: 66.66%;">
         <!-- Query Details Section (Name, ID, Description) -->
-        <QueryDetailsEditor
+        <UnifiedDetailsEditor
           ref="queryDetailsEditorRef"
-          :selectedQuery="selectedQuery"
+          :item="selectedQuery"
+          :is-creating="!selectedQuery"
           @update:name="handleNameUpdate"
           @update:description="handleDescriptionUpdate"
-          @update:id="handleIdUpdate"
           @modified="handleDetailsModification"
         />
         <Codemirror
@@ -77,7 +76,6 @@
       </div> <!-- End Left part -->
 
       <!-- Right part: Analysis Sidebar (takes less space, e.g., 1/3) -->
-      <!-- Right part: Analysis Sidebar (takes less space, e.g., 1/3) -->
       <QueryAnalysisSidebar
         ref="analysisSidebarRef"
         :code="code"
@@ -116,7 +114,7 @@ import { ref, shallowRef, computed, watch, nextTick, onMounted, type Ref, toRef 
 import { Codemirror } from 'vue-codemirror';
 import { sparql } from 'codemirror-lang-sparql';
 import { Button } from '@/components/ui/button';
-import QueryDetailsEditor from '@/components/QueryDetailsEditor.vue';
+import UnifiedDetailsEditor from '@/components/UnifiedDetailsEditor.vue'; // Changed
 import QueryAnalysisSidebar from '@/components/QueryAnalysisSidebar.vue';
 import QueryResultDisplay from '@/components/QueryResultDisplay.vue';
 import QueryExecutionControls from '@/components/QueryExecutionControls.vue';
@@ -135,13 +133,11 @@ import {
 import { useSettings } from '@/composables/useSettings';
 import { useExecutionBackendsApi, type ExecutionBackend } from '@/composables/useExecutionBackendsApi';
 import mediaTypes from '@/assets/data/mediaTypes.json';
-// QueryParameterGroup might still be needed for the Query type itself, but not directly for arguments input anymore
 import type { Query, SparqlResults, SparqlBinding, DetectedParametersResponse } from '@/types/query'; // Import DetectedParametersResponse
 import { useQueryExecution } from '@/composables/useQueryExecution';
 import { useQueryPersistence } from '@/composables/useQueryPersistence';
 import type QueryList from '@/components/QueryList.vue'; // Import type for dummy ref
 
-// --- Re-define types from QueryArgumentsInput.vue (Ideally move to types/query.ts) ---
 interface ArgumentValue {
   value: string;
   type: 'uri' | 'literal';
@@ -156,34 +152,25 @@ interface QueryArgumentsModel {
   limit: Record<string, string>;
   offset: Record<string, string>;
 }
-// --- End Type Definitions ---
 
-
-// --- Props ---
 const props = defineProps<{
   selectedLibraryId: string | null;
   selectedQueryProp: Query | null;
-  // Update prop type to use the new model structure
   queryArguments: QueryArgumentsModel;
 }>();
 
-// --- Emits ---
 const emit = defineEmits<{
   (e: 'queryCreated', query: Query): void
   (e: 'querySaved', query: Query): void
   (e: 'queryDeleted', queryId: string): void
-  // Update emit payload type
   (e: 'update:queryArguments', args: QueryArgumentsModel): void
   (e: 'startedCreatingQuery'): void
 }>();
 
-// --- Handler for Arguments Update ---
-// Update handler parameter type
 const handleArgumentsUpdate = (newArgs: QueryArgumentsModel) => {
   emit('update:queryArguments', newArgs);
 };
 
-// --- Settings & APIs ---
 const { apiUrl } = useSettings();
 const {
   backends: executionBackends,
@@ -192,87 +179,54 @@ const {
   fetchBackends,
 } = useExecutionBackendsApi();
 
-// --- State ---
-// Selected Query and Edit State (managed internally now, initialized by prop)
 const selectedQuery = ref<Query | null>(null);
 const editedName = ref('');
-const editedDescription = ref<string | undefined>(''); // Allow undefined
-const editedId = ref('');
-const isQueryDetailsModified = ref(false); // Tracks if ID field specifically is modified
-const initialCode = ref(''); // Store initial code for comparison
-const initialName = ref(''); // Store initial name
-const initialDescription = ref<string | undefined>(''); // Store initial description
+const editedDescription = ref<string | undefined>('');
+const editedId = ref(''); // Retained for useQueryPersistence, though not directly edited in UI
+const isQueryDetailsModified = ref(false);
+const initialCode = ref('');
+const initialName = ref('');
+const initialDescription = ref<string | undefined>('');
 
-// Editor Content
-const code = ref(''); // Initialized by watcher below
-
-// Codemirror extensions
+const code = ref('');
 const extensions = shallowRef([sparql()]);
-
-// Query Analysis State
 const isEditingQuery = ref(false);
-
-// Saving State
 const isSaving = ref(false);
 
-// Component Refs
 const analysisSidebarRef = ref<InstanceType<typeof QueryAnalysisSidebar> | null>(null);
-const queryDetailsEditorRef = ref<InstanceType<typeof QueryDetailsEditor> | null>(null);
+const queryDetailsEditorRef = ref<InstanceType<typeof UnifiedDetailsEditor> | null>(null); // Changed
 const queryArgumentsInputRef = ref<InstanceType<typeof QueryArgumentsInput> | null>(null);
-const dummyQueryListRef = ref<InstanceType<typeof QueryList> | null>(null); // Dummy ref for type compatibility
+const dummyQueryListRef = ref<InstanceType<typeof QueryList> | null>(null);
 
-// --- Computed ---
 const isNameValid = computed(() => !!editedName.value.trim());
-
-const isIdValid = computed(() => {
-  // ID is optional for new queries, always valid if empty when creating
-  if (!selectedQuery.value && !editedId.value.trim()) {
-    return true;
-  }
-  // ID validation is no longer needed here as the input field is removed
-  // The ID is now managed internally or auto-generated on save.
-  return true; // Always consider the ID valid from the editor's perspective
-});
-
+const isIdValid = computed(() => true); // ID is managed internally or auto-generated
 const hasParseError = computed(() => analysisSidebarRef.value?.hasParseError ?? false);
 
-
-// --- Event Handlers for QueryDetailsEditor ---
 const handleNameUpdate = (value: string) => {
   editedName.value = value;
 };
 const handleDescriptionUpdate = (value: string | undefined) => {
   editedDescription.value = value;
 };
-const handleIdUpdate = (value: string) => {
-  editedId.value = value;
-};
+// handleIdUpdate is removed as UnifiedDetailsEditor does not emit 'update:id'
+
 const handleDetailsModification = (isModified: boolean) => {
-  // This event now only signals modification of the ID field from the child
   isQueryDetailsModified.value = isModified;
 };
 
+// handleDetailsSave removed as UnifiedDetailsEditor no longer emits 'save'
 
-// --- Computed ---
 const isQueryModified = computed(() => {
   if (!props.selectedLibraryId) return false;
-
-  // Check if details (name, description, ID) have changed from their initial state
   const nameChanged = editedName.value !== initialName.value;
   const descriptionChanged = editedDescription.value !== initialDescription.value;
-  const idChanged = editedId.value !== (selectedQuery.value?.['@id'] ?? ''); // Compare ID against original or empty
-
-  // Check if code has changed
+  // ID is not directly part of this modification check anymore as it's not user-editable here
   const codeChanged = code.value !== initialCode.value;
-
-  // Overall modification status
-  return nameChanged || descriptionChanged || idChanged || codeChanged;
+  return nameChanged || descriptionChanged || codeChanged || isQueryDetailsModified.value;
 });
 
-// Create a ref from the prop for the composable
 const queryArgumentsRef = toRef(props, 'queryArguments');
 
-// --- Composables ---
 const {
   results,
   textResults,
@@ -290,122 +244,108 @@ const {
   displayCurlCommand,
   copyCurlCommand,
 } = useQueryExecution(
-  selectedQuery, // Use internal selectedQuery ref
+  selectedQuery,
   isQueryModified,
   analysisSidebarRef,
   isLoadingBackends,
   isSaving,
-  queryArgumentsRef // Pass the ref created with toRef
+  queryArgumentsRef
 );
 
-// Function to reset internal edit state (name, desc, id)
 const resetEditState = (query: Query | null) => {
     editedName.value = query?.name ?? '';
     editedDescription.value = query?.description ?? undefined;
-    editedId.value = query?.['@id'] ?? '';
+    editedId.value = query?.['@id'] ?? ''; // Still needed for persistence
     initialName.value = editedName.value;
     initialDescription.value = editedDescription.value;
-    // Initial ID for comparison is always the one from the selectedQuery (or empty if new)
-    // initialId is handled within QueryDetailsEditor now for its own comparison logic
-    isQueryDetailsModified.value = false; // Reset ID modification flag
+    isQueryDetailsModified.value = false;
 };
 
-// Create computed ref for library ID to pass to composable
 const computedLibraryId = computed(() => props.selectedLibraryId);
 
 const prepareNewQueryState = () => {
   selectedQuery.value = null;
   const newQueryInitialCode = `SELECT * WHERE {\n  ?s ?p ?o .\n  VALUES ?p { UNDEF }\n}`;
   code.value = newQueryInitialCode;
-  initialCode.value = newQueryInitialCode; // Store initial state
+  initialCode.value = newQueryInitialCode;
   results.value = null;
   textResults.value = null;
   resultContentType.value = null;
   error.value = null;
 
-  // Reset analysis sidebar state directly (mirroring original logic)
   if (analysisSidebarRef.value) {
       analysisSidebarRef.value.queryOutputs = [];
-      analysisSidebarRef.value.detectedParameters = null; // Reset to null
+      analysisSidebarRef.value.detectedParameters = null;
       analysisSidebarRef.value.currentParameters = null;
       analysisSidebarRef.value.errorAnalysis = null;
       analysisSidebarRef.value.parseError = null;
       analysisSidebarRef.value.hasParseError = false;
       analysisSidebarRef.value.parameterMode = 'Detect';
-      analysisSidebarRef.value?.triggerAnalysis(code.value); // Re-analyze blank query
+      analysisSidebarRef.value?.triggerAnalysis(code.value);
   }
-  // Reset details editor state using its own method
-  queryDetailsEditorRef.value?.prepareNewQueryState();
-  isQueryDetailsModified.value = false; // Reset modification flag
-  // Reset arguments by emitting the update event with the correct empty structure
+  // UnifiedDetailsEditor is controlled by :item and :is-creating props for its display state.
+  // Its internal prepareNewQueryState is for its own new item state.
+  // Here, we ensure parent state is reset.
+  resetEditState(null); // Resets editedName, editedDescription, editedId for parent
+  if (queryDetailsEditorRef.value && typeof queryDetailsEditorRef.value.prepareNewQueryState === 'function') {
+    queryDetailsEditorRef.value.prepareNewQueryState(); // Tell child to also reset for new
+  }
+  isQueryDetailsModified.value = false;
   emit('update:queryArguments', { values: {}, limit: {}, offset: {} });
 };
 
 const { saveQuery: persistSaveQuery, deleteQuery: persistDeleteQuery } = useQueryPersistence(
   apiUrl,
-  computedLibraryId, // Pass computed ref
-  selectedQuery, // The canonical selected query state
-  editedName, // Pass local refs for details
+  computedLibraryId,
+  selectedQuery,
+  editedName,
   editedDescription,
-  editedId,
-  code, // Pass code ref
-  isSaving, // Pass saving state ref
-  analysisSidebarRef, // Pass analysis sidebar ref
-  // queryDetailsEditorRef removed
-  dummyQueryListRef, // Pass dummy ref
-  isQueryModified, // Pass overall modification computed
-  prepareNewQueryState // Pass the state reset function
+  editedId, // Pass editedId for persistence
+  code,
+  isSaving,
+  analysisSidebarRef,
+  dummyQueryListRef,
+  isQueryModified,
+  prepareNewQueryState
 );
 
-// --- Methods ---
 const saveQuery = async () => {
-  const isNewQuery = !selectedQuery.value; // Check if it's a new query *before* saving
-  await persistSaveQuery(); // Call the composable function
-  // The composable should update selectedQuery ref internally
-  if (selectedQuery.value) { // Check if save was successful (selectedQuery is now populated/updated)
-    // Update initial state after successful save
+  const isNewQuery = !selectedQuery.value;
+  // editedId will be empty for new queries, useQueryPersistence handles assigning one if needed.
+  await persistSaveQuery();
+  if (selectedQuery.value) {
     initialCode.value = selectedQuery.value.query;
-    resetEditState(selectedQuery.value); // Reset edit state based on the saved query
+    resetEditState(selectedQuery.value);
     if (isNewQuery) {
-      emit('queryCreated', selectedQuery.value); // Emit specific event for creation
+      emit('queryCreated', selectedQuery.value);
     } else {
       emit('querySaved', selectedQuery.value);
     }
   } else {
     console.error("Save operation failed or did not return a query.");
-    // Handle error appropriately, maybe show a notification
   }
 };
 
 const deleteQuery = async () => {
   const queryToDeleteId = selectedQuery.value?.['@id'];
   if (!queryToDeleteId) return;
-
-  await persistDeleteQuery(); // Call composable
-  // The composable calls prepareNewQueryState on success, resetting the view.
-  // We just need to notify the parent list.
+  await persistDeleteQuery();
   emit('queryDeleted', queryToDeleteId);
 };
 
 const discardChanges = () => {
   if (!isQueryModified.value) return;
-
   if (selectedQuery.value) {
-    // Re-apply the original selected query data from the ref (which wasn't modified)
-    code.value = selectedQuery.value.query; // Reset code
-    initialCode.value = selectedQuery.value.query; // Reset initial code baseline
-    resetEditState(selectedQuery.value); // Reset local name/desc/id refs
-    // QueryDetailsEditor watcher will update its internal state based on selectedQuery prop change
+    code.value = selectedQuery.value.query;
+    initialCode.value = selectedQuery.value.query;
+    resetEditState(selectedQuery.value); // This will also reset editedName, editedDescription
 
-    // Reset analysis sidebar based on the original query
     if (analysisSidebarRef.value) {
-        // Reset analysis state directly
         analysisSidebarRef.value.queryOutputs = [];
-        analysisSidebarRef.value.detectedParameters = null; // Reset to null
+        analysisSidebarRef.value.detectedParameters = null;
         analysisSidebarRef.value.errorAnalysis = null;
         analysisSidebarRef.value.parseError = null;
         analysisSidebarRef.value.hasParseError = false;
-        // Set parameter mode based on original query
         if (selectedQuery.value.parameters && selectedQuery.value.parameters.length > 0) {
             analysisSidebarRef.value.parameterMode = 'Specify';
             analysisSidebarRef.value.currentParameters = selectedQuery.value.parameters;
@@ -413,85 +353,66 @@ const discardChanges = () => {
             analysisSidebarRef.value.parameterMode = 'Detect';
             analysisSidebarRef.value.currentParameters = null;
         }
-        analysisSidebarRef.value.triggerAnalysis(code.value); // Re-analyze original code
+        analysisSidebarRef.value.triggerAnalysis(code.value);
     }
-    // Clear execution results
     results.value = null;
     textResults.value = null;
     resultContentType.value = null;
     error.value = null;
-    // Reset arguments (assuming v-model handles the update)
-    // Need to know how arguments were initially loaded/set to reset correctly.
-    // If they came from the URL via the parent, the parent's state should be the source of truth.
-    // For now, just clear them. Revisit if initial state needs to be restored.
-    emit('update:queryArguments', { values: {}, limit: {}, offset: {} }); // Clear arguments on discard by emitting
+    emit('update:queryArguments', { values: {}, limit: {}, offset: {} });
   } else {
-    // If it was a new query, just reset everything
     prepareNewQueryState();
   }
 };
 
-
 const startCreatingQuery = async () => {
   if (!props.selectedLibraryId) {
-    alert('Please select a library first.'); // Or handle differently
+    alert('Please select a library first.');
     return;
   }
-  prepareNewQueryState(); // Reset state for a new query
-  emit('startedCreatingQuery'); // Notify parent to clear its selection state
+  prepareNewQueryState();
+  emit('startedCreatingQuery');
   await nextTick();
-  // Focus the name input - EditableDetailsDisplay handles its own focus now
-  // We might need a way to trigger focus in the child if desired.
+  // UnifiedDetailsEditor handles its own focus logic based on isCreating/isEditing
 };
 
 const saveButtonTitle = computed(() => {
-  const hasParseError = analysisSidebarRef.value?.hasParseError ?? false;
-  // Removed isValidUriFn check as ID input is gone
-
   if (!props.selectedLibraryId) return 'Select a library first';
-  if (!editedName.value.trim()) return 'Query Name is required'; // Use local ref
-  // Removed ID validation check
-  if (hasParseError) return 'Cannot save with SPARQL parse errors'; // Check parse error from analysis sidebar
-  if (!isQueryModified.value) return 'No changes to save'; // Check overall modification state
-  if (isSaving.value) return 'Saving...'; // Check saving status
-  return selectedQuery.value ? 'Save Changes' : 'Save New Query'; // Adjust button text
+  if (!isNameValid.value) return 'Query Name is required';
+  if (hasParseError.value) return 'Cannot save with SPARQL parse errors';
+  if (!isQueryModified.value) return 'No changes to save';
+  if (isSaving.value) return 'Saving...';
+  return selectedQuery.value ? 'Save Changes' : 'Save New Query';
 });
 
-// --- Watchers ---
 watch(code, () => {
   isEditingQuery.value = true;
 });
 
-// Watch analysis loading state
 watch(() => analysisSidebarRef.value?.isLoadingAnalysis, (isLoading, wasLoading) => {
   if (wasLoading && !isLoading && !analysisSidebarRef.value?.hasParseError) {
-    isEditingQuery.value = false; // Re-enable editor after analysis (if no error)
+    isEditingQuery.value = false;
   }
 });
 
-// Watch the incoming prop to update the internal state when the parent selects a different query
 watch(() => props.selectedQueryProp, (newSelectedQuery) => {
-  // Avoid infinite loops if the internal state is already aligned with the prop
-  if (newSelectedQuery?.['@id'] === selectedQuery.value?.['@id']) {
+  if (newSelectedQuery?.['@id'] === selectedQuery.value?.['@id'] && newSelectedQuery !== null) { // Ensure not to skip if new is null and old was also null effectively
       return;
   }
 
   if (newSelectedQuery) {
     console.log("QueryEditorView: Prop changed, updating internal state for", newSelectedQuery.name);
-    selectedQuery.value = { ...newSelectedQuery }; // Clone to avoid modifying prop
+    selectedQuery.value = { ...newSelectedQuery };
     code.value = newSelectedQuery.query;
-    initialCode.value = newSelectedQuery.query; // Set baseline for modification check
-    resetEditState(newSelectedQuery); // Reset local edit state based on new prop
+    initialCode.value = newSelectedQuery.query;
+    resetEditState(newSelectedQuery);
 
-    // Reset analysis sidebar based on the new query
     if (analysisSidebarRef.value) {
-        // Reset analysis state directly
         analysisSidebarRef.value.queryOutputs = [];
-        analysisSidebarRef.value.detectedParameters = null; // Reset to null
+        analysisSidebarRef.value.detectedParameters = null;
         analysisSidebarRef.value.errorAnalysis = null;
         analysisSidebarRef.value.parseError = null;
         analysisSidebarRef.value.hasParseError = false;
-        // Set parameter mode based on new query
         if (newSelectedQuery.parameters && newSelectedQuery.parameters.length > 0) {
             analysisSidebarRef.value.parameterMode = 'Specify';
             analysisSidebarRef.value.currentParameters = newSelectedQuery.parameters;
@@ -499,44 +420,29 @@ watch(() => props.selectedQueryProp, (newSelectedQuery) => {
             analysisSidebarRef.value.parameterMode = 'Detect';
             analysisSidebarRef.value.currentParameters = null;
         }
-        analysisSidebarRef.value.triggerAnalysis(code.value); // Analyze new code
+        analysisSidebarRef.value.triggerAnalysis(code.value);
     }
-
-    // Clear execution results
     results.value = null;
     textResults.value = null;
     resultContentType.value = null;
     error.value = null;
-
-    // Arguments are handled by the parent via the queryArguments prop and URL sync.
-    // No need to reset them here based on the selected query's parameters.
-
   } else {
-    // If prop becomes null (e.g., deselect or new query started by parent)
     console.log("QueryEditorView: Prop is null, preparing new query state.");
-    // Only reset if the internal state isn't already null (avoids redundant resets)
-    if (selectedQuery.value !== null) {
-       prepareNewQueryState(); // This will also clear arguments via queryArgumentsRef.value = {}
+    if (selectedQuery.value !== null) { // Only if not already null
+       prepareNewQueryState();
     }
   }
-}, { immediate: true, deep: true }); // Deep watch needed as parent might modify the query object
+}, { immediate: true, deep: true });
 
-
-// Watch execution backends to set default
 watch(executionBackends, (newBackends) => {
   if (newBackends && newBackends.length > 0 && !selectedBackendId.value) {
     selectedBackendId.value = newBackends[0]['@id'];
   }
 }, { immediate: true });
 
-// --- Lifecycle Hooks ---
 onMounted(async () => {
   await fetchBackends();
-  // Initial state is set by the selectedQueryProp watcher
-  // Arguments are set by the parent page based on URL state
-  if (!selectedQuery.value) {
-      // prepareNewQueryState(); // Don't call this here, watcher handles initial state based on prop
-  }
+  // Initial state (including for new query) is set by the selectedQueryProp watcher
 });
 
 </script>

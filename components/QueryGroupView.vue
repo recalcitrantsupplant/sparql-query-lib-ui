@@ -33,13 +33,14 @@
     </div>
 
     <!-- Details Display (Handles its own editing state now) -->
-    <EditableDetailsDisplay
+    <UnifiedDetailsEditor
       ref="detailsEditorRef"
       :item="selectedGroup"
       :is-creating="isCreatingNewGroup"
-      @save="handleSaveGroupDetails"
+      @update:name="selectedGroup ? selectedGroup.name = $event : null"
+      @update:description="selectedGroup ? selectedGroup.description = $event : null"
       @cancel-create="handleCancelCreateGroup"
-      @update:isDirty="handleDetailsDirtyUpdate"
+      @modified="handleDetailsModifiedUpdate"
       class="mb-4"
     />
     <!-- TODO: Add handling for when no group is selected (e.g., display message or creation prompt) -->
@@ -60,7 +61,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, toRef } from 'vue';
 import QueryGroupActionButtons from '@/components/QueryGroupActionButtons.vue';
-import EditableDetailsDisplay from '@/components/EditableDetailsDisplay.vue';
+import UnifiedDetailsEditor from '@/components/UnifiedDetailsEditor.vue'; // Changed
 import {
   AlertDialog,
   AlertDialogAction,
@@ -94,11 +95,11 @@ const emit = defineEmits<{
 // --- State ---
 const selectedGroup = ref<QueryGroup | null>(null);
 const isCreatingNewGroup = ref(false);
-const detailsAreDirty = ref(false); // Track dirty state from EditableDetailsDisplay
+const detailsAreDirty = ref(false); // This now reflects the 'modified' state from UnifiedDetailsEditor
 const canvasIsDirty = ref(false); // Track dirty state from QueryGroupCanvas
 const showConfirmDialog = ref(false);
 const pendingSelectedGroup = ref<QueryGroup | null>(null); // Store the group user wants to switch to
-const detailsEditorRef = ref<InstanceType<typeof EditableDetailsDisplay> | null>(null); // Ref for the details editor component
+const detailsEditorRef = ref<InstanceType<typeof UnifiedDetailsEditor> | null>(null); // Changed
 const canvasRef = ref<InstanceType<typeof QueryGroupCanvas> | null>(null); // Ref for the canvas component
 
 // Combined modified state
@@ -158,26 +159,61 @@ defineExpose({ selectedGroup });
 const handleSaveGroupDetails = async (details: { name: string; description: string | undefined }) => {
   console.log('QueryGroupView: Saving group details initiated', details);
 
+  let currentNodes: QueryGroup['nodes'] = selectedGroup.value?.nodes || [];
+  let currentEdges: QueryGroup['edges'] = selectedGroup.value?.edges || [];
+  let currentCanvasLayout: string | undefined = selectedGroup.value?.canvasLayout;
+
+  if (canvasRef.value) {
+    const flowNodes = canvasRef.value.getNodes();
+    const flowEdges = canvasRef.value.getEdges();
+    currentCanvasLayout = canvasRef.value.getCanvasLayoutString();
+
+    currentNodes = flowNodes.map(flowNode => ({
+      '@id': flowNode.id,
+      '@type': 'QueryNode', // Ensure type is present
+      queryId: flowNode.data?.queryId, // queryId is in data
+      position: flowNode.position,
+      label: flowNode.data?.label || flowNode.label, // Prefer data.label, fallback to node.label
+      // parameterMappings and backendId would need to be merged if they exist on original nodes
+      // For simplicity, if a node existed, try to find its original mappings/backendId
+      // This part might need more sophisticated merging if those fields are critical and can change
+      // or if nodes can be created/deleted and their full state isn't managed by canvas data.
+      // For now, we assume new nodes won't have these, and existing nodes' other props are preserved
+      // if not directly editable on the canvas.
+      // A safer approach for existing nodes is to find the original and update only canvas-managed fields.
+      parameterMappings: selectedGroup.value?.nodes?.find(n => n['@id'] === flowNode.id)?.parameterMappings,
+      backendId: selectedGroup.value?.nodes?.find(n => n['@id'] === flowNode.id)?.backendId,
+    }));
+
+    currentEdges = flowEdges.map(flowEdge => {
+      const existingEdge = selectedGroup.value?.edges?.find(e => e['@id'] === flowEdge.id);
+      return {
+        '@id': flowEdge.id,
+        '@type': 'QueryEdge', // Ensure type is present
+        fromNodeId: flowEdge.source,
+        toNodeId: flowEdge.target,
+        label: typeof flowEdge.label === 'string' ? flowEdge.label : undefined,
+        mappings: existingEdge?.mappings || [], // Preserve existing mappings or default to empty for new edges
+      };
+    });
+  }
+
   const groupDataToSave: QueryGroupSaveData = {
     '@id': selectedGroup.value?.['@id'], // Include ID only if updating
     name: details.name,
     description: details.description,
-    // Get layout from canvas component
-    canvasLayout: canvasRef.value?.getCanvasLayoutString() || selectedGroup.value?.canvasLayout, // Use current layout or fallback to existing if canvas not ready/modified
-    // Keep existing nodes/edges/start/end for now, assuming layout is the primary change here
-    // TODO: Decide if nodes/edges should also be updated based on canvas state in this save action
-    nodes: selectedGroup.value?.nodes || [],
-    edges: selectedGroup.value?.edges || [],
-    startNodeIds: selectedGroup.value?.startNodeIds || [],
-    endNodeIds: selectedGroup.value?.endNodeIds || [],
+    canvasLayout: currentCanvasLayout,
+    nodes: currentNodes,
+    edges: currentEdges,
+    startNodeIds: selectedGroup.value?.startNodeIds || [], // Preserve these as they are not canvas-managed
+    endNodeIds: selectedGroup.value?.endNodeIds || [],   // Preserve these
   };
 
   try {
     const savedGroup = await persistSaveGroup(groupDataToSave);
     if (savedGroup) {
-      // Reset individual dirty flags after successful save
-      detailsAreDirty.value = false;
-      canvasIsDirty.value = false; // Also reset canvas dirty flag
+      detailsAreDirty.value = false; // Reset after successful save
+      canvasIsDirty.value = false;
       isCreatingNewGroup.value = false;
       if (groupDataToSave['@id']) {
         emit('groupSaved', savedGroup);
@@ -185,9 +221,9 @@ const handleSaveGroupDetails = async (details: { name: string; description: stri
         emit('groupCreated', savedGroup);
       }
       console.log('Group details saved successfully.');
-      return savedGroup; // Return the saved group for dialog logic
+      return savedGroup;
     }
-    return null; // Indicate save failed or wasn't needed
+    return null;
   } catch (error) {
     console.error("Failed to save group details:", error);
     alert(`Error saving group: ${persistenceError.value?.message || 'Unknown error'}`);
@@ -199,9 +235,9 @@ const handleCancelCreateGroup = () => {
   prepareNewGroupState(true); // Reset state fully, including dirty flag
 };
 
-const handleDetailsDirtyUpdate = (isDirty: boolean) => {
-  detailsAreDirty.value = isDirty;
-  // isGroupModified is computed, no need to set it directly here
+// Renamed from handleDetailsDirtyUpdate
+const handleDetailsModifiedUpdate = (isModified: boolean) => {
+  detailsAreDirty.value = isModified;
 };
 
 // Handler for canvas dirty state
@@ -213,37 +249,65 @@ const handleCanvasDirtyUpdate = (isDirty: boolean) => {
 
 const startCreatingGroup = () => {
   console.log('QueryGroupView: Starting new group creation');
-  // Check combined modified state
   if (isGroupModified.value && selectedGroup.value) {
       alert("Please save or discard changes to the current group before creating a new one.");
       return;
   }
-
   prepareNewGroupState(false);
   isCreatingNewGroup.value = true;
 };
 
 const saveGroup = async () => {
-    console.warn("Direct saveGroup call - intended for canvas-only changes.");
+    console.warn("Direct saveGroup call - intended for canvas-only changes. Ensuring canvas state is captured.");
     if (selectedGroup.value && isGroupModified.value) {
-        const currentDetails = selectedGroup.value;
+        const baseDetails = selectedGroup.value; // Use selectedGroup as the base for name/desc etc.
+
+        let currentNodes: QueryGroup['nodes'] = baseDetails.nodes || [];
+        let currentEdges: QueryGroup['edges'] = baseDetails.edges || [];
+        let currentCanvasLayout: string | undefined = baseDetails.canvasLayout;
+
+        if (canvasRef.value) {
+            const flowNodes = canvasRef.value.getNodes();
+            const flowEdges = canvasRef.value.getEdges();
+            currentCanvasLayout = canvasRef.value.getCanvasLayoutString();
+
+            currentNodes = flowNodes.map(flowNode => ({
+                '@id': flowNode.id,
+                '@type': 'QueryNode',
+                queryId: flowNode.data?.queryId,
+                position: flowNode.position,
+                label: flowNode.data?.label || flowNode.label,
+                parameterMappings: baseDetails.nodes?.find(n => n['@id'] === flowNode.id)?.parameterMappings,
+                backendId: baseDetails.nodes?.find(n => n['@id'] === flowNode.id)?.backendId,
+            }));
+
+            currentEdges = flowEdges.map(flowEdge => {
+                const existingEdge = baseDetails.edges?.find(e => e['@id'] === flowEdge.id);
+                return {
+                    '@id': flowEdge.id,
+                    '@type': 'QueryEdge',
+                    fromNodeId: flowEdge.source,
+                    toNodeId: flowEdge.target,
+                    label: typeof flowEdge.label === 'string' ? flowEdge.label : undefined,
+                    mappings: existingEdge?.mappings || [],
+                };
+            });
+        }
+
         const groupDataToSave: QueryGroupSaveData = {
-            '@id': currentDetails['@id'],
-            name: currentDetails.name,
-            description: currentDetails.description,
-            // Get layout from canvas component
-            canvasLayout: canvasRef.value?.getCanvasLayoutString() || currentDetails.canvasLayout, // Use current layout or fallback
-            // Keep existing nodes/edges/start/end for now
-            // TODO: Decide if nodes/edges should also be updated based on canvas state
-            nodes: currentDetails.nodes || [],
-            edges: currentDetails.edges || [],
-            startNodeIds: currentDetails.startNodeIds || [],
-            endNodeIds: currentDetails.endNodeIds || [],
+            '@id': baseDetails['@id'], // Must have @id if selectedGroup exists
+            name: baseDetails.name,
+            description: baseDetails.description,
+            canvasLayout: currentCanvasLayout,
+            nodes: currentNodes,
+            edges: currentEdges,
+            startNodeIds: baseDetails.startNodeIds || [],
+            endNodeIds: baseDetails.endNodeIds || [],
         };
-         try {
+
+        try {
             const savedGroup = await persistSaveGroup(groupDataToSave);
             if (savedGroup) {
-                // Reset individual dirty flags
                 detailsAreDirty.value = false;
                 canvasIsDirty.value = false;
                 emit('groupSaved', savedGroup);
@@ -285,19 +349,16 @@ const discardGroupChanges = () => {
         fetchQueryGroupById(groupId).then(originalGroup => {
             if (originalGroup) {
                 selectedGroup.value = { ...originalGroup };
-                // Reset individual dirty flags
                 detailsAreDirty.value = false;
                 canvasIsDirty.value = false;
                 console.log('Original group data reloaded after discard.');
             } else {
                 console.error('Failed to reload original group data after discard.');
-                 // Reset flags even on error
                 detailsAreDirty.value = false;
                 canvasIsDirty.value = false;
             }
         }).catch(err => {
              console.error('Error reloading group data:', err);
-              // Reset flags even on error
              detailsAreDirty.value = false;
              canvasIsDirty.value = false;
         });
@@ -314,29 +375,45 @@ const proceedWithGroupChange = (newGroup: QueryGroup | null) => {
   selectedGroup.value = newGroup ? { ...newGroup } : null;
   pendingSelectedGroup.value = null;
   showConfirmDialog.value = false;
-  // Reset individual dirty flags
   detailsAreDirty.value = false;
   canvasIsDirty.value = false;
   isCreatingNewGroup.value = false;
 };
 
-const handleConfirmSave = () => {
+const handleConfirmSave = async () => {
   console.log('Dialog: Confirm Save clicked');
   if (!detailsEditorRef.value) {
-      console.error("Details editor ref not available.");
-      showConfirmDialog.value = false;
-      return;
+    console.error("Details editor ref not available.");
+    showConfirmDialog.value = false;
+    return;
   }
 
-  const saveInitiated = detailsEditorRef.value.save();
-
-  if (saveInitiated) {
-    console.log('Save initiated in child component, proceeding with group switch.');
-    proceedWithGroupChange(pendingSelectedGroup.value);
+  if (detailsAreDirty.value) {
+    if (selectedGroup.value) {
+      // Call handleSaveGroupDetails directly with the current (updated by @update:name/desc) details
+      const savedGroup = await handleSaveGroupDetails({
+        name: selectedGroup.value.name,
+        description: selectedGroup.value.description,
+      });
+      if (savedGroup) {
+        // Save was successful, detailsAreDirty should be false now (set in handleSaveGroupDetails)
+        proceedWithGroupChange(pendingSelectedGroup.value);
+      } else {
+        // Save failed, keep dialog open or handle error
+        console.error("Dialog: handleSaveGroupDetails failed. Save dialog remains open or needs error handling.");
+        // Optionally, close the dialog and don't switch:
+        // showConfirmDialog.value = false;
+        // pendingSelectedGroup.value = null;
+        return; // Prevent proceeding if save failed
+      }
+    } else {
+      console.error("Dialog: Cannot save, selectedGroup is null.");
+      showConfirmDialog.value = false; // Close dialog
+      return; // Don't proceed
+    }
   } else {
-    console.log('Save not initiated by child component (validation likely failed).');
-    showConfirmDialog.value = false;
-    pendingSelectedGroup.value = null;
+    // No details were dirty, just proceed with the switch
+    proceedWithGroupChange(pendingSelectedGroup.value);
   }
 };
 
@@ -362,7 +439,6 @@ watch(() => props.selectedGroupProp, (newGroupProp, oldGroupProp) => {
 
   console.log('QueryGroupView: selectedGroupProp changed:', newGroupProp?.name ?? 'null');
 
-  // Check combined modified state
   if (isGroupModified.value) {
     console.log('Unsaved changes detected (details or canvas), showing confirmation dialog.');
     pendingSelectedGroup.value = newGroupProp ? { ...newGroupProp } : null;

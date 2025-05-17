@@ -5,9 +5,8 @@
       v-model:nodes="nodes"
       v-model:edges="edges"
       :node-types="nodeTypes"
-      fit-view-on-init
       @edge-click="onEdgeClick"
-      :elements-selectable="true" 
+      :elements-selectable="true"
       :edges-updatable="true"
     >
       <!-- Use slot to customize node rendering and attach event listener -->
@@ -139,9 +138,15 @@
           </DialogClose>
           <Button type="button" @click="confirmEdgeEdit">Save Label</Button>
         </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    </DialogContent>
+  </Dialog>
+
+  <!-- Debug View for Canvas State -->
+  <div class="absolute bottom-0 left-0 right-0 p-2 bg-gray-800 text-white text-xs max-h-64 overflow-auto z-20">
+    <h4 class="font-bold mb-1">Canvas State (Debug)</h4>
+    <pre>{{ canvasStateJson }}</pre>
   </div>
+</div>
 </template>
 
 <script setup lang="ts">
@@ -214,7 +219,20 @@ const nodes: Ref<Node[]> = ref([]);
 const edges: Ref<Edge[]> = ref([]);
 // Call useVueFlow without arguments; v-model handles the refs.
 // Get addNodes and project from useVueFlow
-const { findNode, updateNodeData, onNodesChange, onEdgesChange, onConnect, addEdges, addNodes, project, viewport, updateEdge } = useVueFlow(); // Added addNodes, project, viewport, updateEdge
+const { findNode, updateNodeData, onNodesChange, onEdgesChange, onConnect, addEdges, addNodes, project, viewport, updateEdge, setViewport, fitView } = useVueFlow(); // Added addNodes, project, viewport, updateEdge, setViewport, fitView
+
+// --- Computed property for Debug View ---
+const canvasStateJson = computed(() => {
+  return JSON.stringify(
+    {
+      nodes: nodes.value,
+      edges: edges.value,
+      viewport: viewport.value,
+    },
+    null,
+    2
+  );
+});
 
 // --- State for Query Assignment ---
 const filterInputRef = ref<HTMLInputElement | null>(null); // Ref for the filter input
@@ -233,32 +251,16 @@ const edgeLabelInput = ref(''); // Input model for the edge label
 watch(() => props.groupData, (newGroupData) => {
   console.log('QueryGroupCanvas: groupData prop changed:', newGroupData);
   if (newGroupData) {
-    // Parse layout
-    let layoutPositions: Record<string, { x: number; y: number }> = {};
-    if (newGroupData.canvasLayout) {
-      try {
-        layoutPositions = JSON.parse(newGroupData.canvasLayout);
-        console.log('Parsed canvasLayout:', layoutPositions);
-      } catch (e) {
-        console.error('Failed to parse canvasLayout JSON:', e);
-        // Continue without layout if parsing fails
-      }
-    } else {
-      console.log('No canvasLayout found in groupData.');
-    }
-
-    // Map API nodes to Vue Flow nodes, merging layout positions and query details
+    // Map API nodes to Vue Flow nodes, using position from ApiQueryNode
     nodes.value = (newGroupData.nodes || []).map((apiNode: ApiQueryNode) => {
-      // Find the full Query object based on queryId
-      const assignedQuery = props.queries.find(q => q['@id'] === apiNode.queryId) || null; // Default to null if not found
+      const assignedQuery = props.queries.find(q => q['@id'] === apiNode.queryId) || null;
 
       return {
         id: apiNode['@id'],
-        type: 'queryNode', // Use the custom type
-        position: layoutPositions[apiNode['@id']] || { x: Math.random() * 400, y: Math.random() * 400 }, // Use saved position or random fallback
+        type: 'queryNode',
+        position: apiNode.position || { x: Math.random() * 400, y: Math.random() * 400 }, // Use position from ApiQueryNode or random fallback
         data: {
-          // Pass relevant data to the custom node component
-          label: apiNode.label || assignedQuery?.name || apiNode['@id'], // Use node label, fallback to query name, fallback to ID
+          label: apiNode.label || assignedQuery?.name || apiNode['@id'],
           queryId: apiNode.queryId,
           queryDetails: assignedQuery, // Pass the full Query object or null
           // inputs: inputs, // REMOVED - Handled by queryDetails
@@ -275,36 +277,57 @@ watch(() => props.groupData, (newGroupData) => {
       id: apiEdge['@id'],
       source: apiEdge.fromNodeId,
       target: apiEdge.toNodeId,
-      label: apiEdge.label, // Pass label if needed for edge rendering
-      // Add other properties like animated, type if needed
-      animated: true, // Example: make edges animated
-      // isSelected: apiEdge.isSelected,
+      label: apiEdge.label,
+      animated: true,
     }));
     console.log('Mapped edges for VueFlow:', edges.value);
+
+    // Handle viewport loading
+    if (newGroupData.canvasLayout) {
+      try {
+        const loadedViewport = JSON.parse(newGroupData.canvasLayout);
+        nextTick(() => { // Ensure nodes are rendered before setting viewport
+          setViewport(loadedViewport);
+          console.log('Applied saved canvasLayout (viewport):', loadedViewport);
+        });
+      } catch (e) {
+        console.error('Failed to parse canvasLayout JSON for viewport:', e);
+        nextTick(() => fitView()); // Fallback to fitView if parsing fails
+      }
+    } else {
+      nextTick(() => fitView()); // No saved layout, fit to view
+      console.log('No canvasLayout found, called fitView.');
+    }
 
   } else {
     // Clear the canvas if groupData is null
     nodes.value = [];
     edges.value = [];
     console.log('Cleared canvas nodes and edges.');
+    // Optionally fitView or reset viewport if needed when cleared
+    nextTick(() => fitView());
   }
-}, { immediate: true, deep: true }); // immediate: run on load, deep: watch nested changes in groupData (though layout parsing only uses top-level)
+}, { immediate: true, deep: true });
 
 
 // --- Event Handlers & Vue Flow Interaction ---
 
 // Handle node drag stop to emit modified event
 onNodesChange((changes) => {
-  // Check if any change involves a position update (drag)
   const positionChanged = changes.some(change => change.type === 'position' && change.dragging === false);
   if (positionChanged) {
     console.log('Node position changed, emitting update:modified');
     emit('update:modified');
   }
-  // Handle other node changes if needed (e.g., selection, removal)
+  const selectionChanged = changes.some(change => change.type === 'select');
+  if (selectionChanged) {
+    // Decide if selection alone should mark as modified. For now, yes.
+    console.log('Node selection changed, emitting update:modified');
+    emit('update:modified');
+  }
 });
 
-// Handle edge changes (e.g., removal)
+// Handle edge changes (e.g., removal, selection)
 onEdgesChange((changes) => {
   // Check if any change involves removal or selection
   const edgeModified = changes.some(change => change.type === 'remove' || change.type === 'select');
@@ -511,25 +534,31 @@ watch(showQuerySelectionDialog, (newValue) => {
 });
 
 // --- Expose Function for Saving ---
-// Function to get the current layout as a JSON string
+// Watcher for viewport changes to emit 'update:modified'
+watch(viewport, (newViewport, oldViewport) => {
+  // Check if it's a meaningful change (e.g., not just initialization or minor float precision)
+  // and if oldViewport exists to avoid firing on initial setup if viewport is immediately set.
+  if (oldViewport && (newViewport.x !== oldViewport.x || newViewport.y !== oldViewport.y || newViewport.zoom !== oldViewport.zoom)) {
+    console.log('Viewport changed (watched), emitting update:modified', newViewport);
+    emit('update:modified');
+  }
+}, { deep: true });
+
+
+// --- Expose Function for Saving ---
+// Function to get the current viewport state as a JSON string
 const getCanvasLayoutString = (): string => {
-  const layoutMap: Record<string, { x: number; y: number }> = {};
-  nodes.value.forEach(node => {
-    // Ensure position exists and has x/y before adding
-    if (node.position && typeof node.position.x === 'number' && typeof node.position.y === 'number') {
-      layoutMap[node.id] = { x: node.position.x, y: node.position.y };
-    } else {
-      console.warn(`Node ${node.id} missing valid position data.`);
-    }
-  });
-  const layoutString = JSON.stringify(layoutMap);
-  console.log('Generated canvasLayout string:', layoutString);
+  // viewport.value should contain { x, y, zoom }
+  const layoutString = JSON.stringify(viewport.value);
+  console.log('Generated canvasLayout string (for viewport):', layoutString);
   return layoutString;
 };
 
 // Expose the function so the parent component can call it
 defineExpose({
   getCanvasLayoutString,
+  getNodes: (): Node[] => nodes.value,
+  getEdges: (): Edge[] => edges.value,
 });
 
 

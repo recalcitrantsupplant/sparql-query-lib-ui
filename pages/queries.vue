@@ -113,7 +113,7 @@ import LibrariesPanel from '@/components/LibrariesPanel.vue'; // Keep
 import { useLibrariesApi, type Library } from '@/composables/useLibrariesApi'; // Import library API
 import ResourceList from '@/components/ResourceList.vue'; // Import the new reusable list
 import QueryGroupActionButtons from '@/components/QueryGroupActionButtons.vue'; // Keep
-import QueryGroupDetailsEditor from '@/components/QueryGroupDetailsEditor.vue'; // Keep
+
 // import QueryGroupDetailsDisplay from '@/components/QueryGroupDetailsDisplay.vue'; // Removed - Handled by EditableDetailsDisplay within QueryGroupView/QueryDetailsEditor
 import QueryGroupCanvas from '@/components/QueryGroupCanvas.vue'; // Keep (Used within QueryGroupView)
 import QueryEditorView from '@/components/QueryEditorView.vue'; // Keep
@@ -136,7 +136,7 @@ import mediaTypes from '@/assets/data/mediaTypes.json'; // Keep (might be needed
 // Consolidated type imports
 // Removed useQueryExecution, useQueryPersistence (moved)
 // Removed useQueryGroupPersistence (moved to QueryGroupView)
-import type { Query, QueryGroup, ResourceItem } from '@/types/query'; // Import ResourceItem from types/query
+import type { Query, QueryGroup, ResourceItem, QueryArgumentsModel } from '@/types/query'; // Import ResourceItem and QueryArgumentsModel from types/query
 
 
 // --- View Mode ---
@@ -163,7 +163,7 @@ const {
 // Selected Query State (passed to QueryEditorView)
 const selectedQuery = ref<Query | null>(null);
 const selectedQueryGroup = ref<QueryGroup | null>(null); // Add state for selected group
-const queryArguments = ref<Record<string, any>>({}); // Add state for query arguments
+const queryArguments = ref<QueryArgumentsModel>({ values: {}, limit: {}, offset: {} }); // Add state for query arguments
 
 // --- Libraries API ---
 // Fetch libraries to allow selecting the first one if none specified in URL
@@ -226,8 +226,23 @@ const handleQueryItemsLoaded = (items: Query[]) => {
   console.log(`Page: Query items loaded (${items.length}). Current selection: ${selectedQuery.value?.['@id'] ?? 'none'}. Initial URL queryId: ${initialQueryIdFromUrl.value}`);
 
   let querySelected = false;
-  // Priority 1: Select query from URL if specified and found
-  if (viewMode.value === 'query' && initialQueryIdFromUrl.value && items && items.length > 0) {
+
+  // Priority 0: Preserve current selection if it's valid and exists in the new list
+  if (viewMode.value === 'query' && selectedQuery.value) {
+    const currentSelectionInNewList = items.find(q => q['@id'] === selectedQuery.value?.['@id']);
+    if (currentSelectionInNewList) {
+      console.log(`Page: Preserving currently selected query: ${selectedQuery.value.name} (${selectedQuery.value['@id']}) as it exists in the new list.`);
+      // Ensure the instance is from the new list if properties might have changed, though often not strictly necessary if only ID is used for selection.
+      // selectedQuery.value = currentSelectionInNewList; // Uncomment if full object refresh is desired
+      querySelected = true;
+    } else {
+      console.log(`Page: Previously selected query ${selectedQuery.value['@id']} not found in the new list. Will attempt other selection logic.`);
+      // The existing selectedQuery.value will be cleared later if no other selection logic applies.
+    }
+  }
+
+  // Priority 1: Select query from URL if specified and found, AND no valid query is already selected by Priority 0
+  if (viewMode.value === 'query' && !querySelected && initialQueryIdFromUrl.value && items && items.length > 0) {
     const queryFromUrl = items.find(q => q['@id'] === initialQueryIdFromUrl.value);
     if (queryFromUrl) {
       console.log(`Page: Selecting query from URL QSA: ${queryFromUrl.name} (${queryFromUrl['@id']})`);
@@ -235,23 +250,24 @@ const handleQueryItemsLoaded = (items: Query[]) => {
       querySelected = true;
     } else {
       console.warn(`Page: Query ID ${initialQueryIdFromUrl.value} from URL QSA not found in loaded items for library ${selectedLibraryId.value}.`);
-      // Don't clear initialQueryIdFromUrl here, let the watcher handle potential mismatches later if needed
     }
   }
 
-  // Priority 2: Select first query as default if none specified in URL and none already selected
-  if (viewMode.value === 'query' && !querySelected && items && items.length > 0 && !selectedQuery.value) {
-    console.log(`Page: No query specified in URL or found. Auto-selecting first query: ${items[0].name}`);
+  // Priority 2: Select first query as default if no query selected by P0 or P1
+  if (viewMode.value === 'query' && !querySelected && items && items.length > 0) {
+    console.log(`Page: No query selected yet or previous/URL selection invalid. Auto-selecting first query: ${items[0].name}`);
     selectedQuery.value = items[0];
-    querySelected = true; // Mark as selected
+    querySelected = true;
   }
 
-  // If still no query selected (e.g., empty list), ensure selectedQuery is null
+  // If still no query selected after all attempts (e.g., empty list), ensure selectedQuery is null
   if (viewMode.value === 'query' && !querySelected) {
+      console.log(`Page: No query could be selected after loading items. Setting selectedQuery to null.`);
       selectedQuery.value = null;
   }
 
-  // Selection attempt complete.
+  // The initialQueryIdFromUrl flag is primarily managed by the watcher on selectedQuery.value?.['@id']
+  // to ensure arguments are handled correctly on initial load vs. subsequent manual selections.
 };
 
 // Handler for when the group resource list finishes loading items
@@ -312,10 +328,11 @@ const handleStartCreatingQuery = () => {
 };
 
 const handleQueryCreatedOrSaved = (query: Query) => {
-  console.log(`Page: Query ${query.name} created/saved.`);
+  console.log(`Page: Query ${query.name} created/saved. Updating selection.`);
+  selectedQuery.value = query; // Ensure the parent page's selectedQuery is updated immediately
   // Refresh the query resource list
   queryResourceListRef.value?.fetchItems(selectedLibraryId.value);
-  // Re-selecting the query is handled by ResourceList internally based on its data source
+  // The ResourceList will refresh, but the selection is already up-to-date.
 };
 
 const handleQueryDeleted = (queryId: string) => {
@@ -355,7 +372,7 @@ watch(selectedLibraryId, (newId, oldId) => {
   if (newId !== oldId) {
     selectedQuery.value = null;
     selectedQueryGroup.value = null;
-    queryArguments.value = {}; // Clear arguments when library changes
+    queryArguments.value = { values: {}, limit: {}, offset: {} }; // Clear arguments when library changes
     // Clear initial IDs from URL state sync when library changes
     initialQueryIdFromUrl.value = null;
     initialGroupIdFromUrl.value = null;
@@ -386,7 +403,7 @@ watch(() => selectedQuery.value?.['@id'], (newQueryId, oldQueryId) => {
       // it means this is a subsequent, manual query selection by the user.
       // Clear the arguments for the newly selected query.
       console.log(`Page Watcher: Manual query selection changed to ${newQueryId}. Clearing arguments.`);
-      queryArguments.value = {};
+      queryArguments.value = { values: {}, limit: {}, offset: {} };
       // Ensure the initial ID flag is cleared if it wasn't already (edge case)
       if (initialQueryIdFromUrl.value) initialQueryIdFromUrl.value = null;
     }
@@ -398,7 +415,7 @@ watch(viewMode, (newMode, oldMode) => {
   console.log(`Page: View mode changed from ${oldMode} to ${newMode}`);
   if (newMode !== 'query') {
     console.log("Page: Clearing query arguments because view mode is not 'query'.");
-    queryArguments.value = {}; // Clear arguments when switching away from query view
+    queryArguments.value = { values: {}, limit: {}, offset: {} }; // Clear arguments when switching away from query view
   }
   // When switching *to* query view, arguments might be loaded from URL by useUrlStateSync
   // or remain empty if no specific query/args are in the URL.
@@ -444,7 +461,7 @@ onMounted(async () => {
   // useUrlStateSync determined initialArgumentsFromUrl during its mount.
   // We apply it here. The watcher logic above is designed to prevent this
   // from being immediately cleared if it corresponds to the initial query selection.
-  queryArguments.value = initialArgumentsFromUrl.value ?? {};
+  queryArguments.value = initialArgumentsFromUrl.value ?? { values: {}, limit: {}, offset: {} };
   console.log("Page: Set initial query arguments based on useUrlStateSync result:", JSON.parse(JSON.stringify(queryArguments.value)));
 
   // 5. Resource list fetching (both query and group) is triggered by the watcher
